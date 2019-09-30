@@ -1,3 +1,5 @@
+package myGrep;
+
 /**
  * KMP
  */

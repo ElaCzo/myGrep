@@ -1,3 +1,5 @@
+package myGrep;
+
 import java.util.Scanner;
 import java.io.IOException;
 import java.lang.Exception;
