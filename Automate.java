@@ -165,6 +165,8 @@ public class Automate {
 
     public static Automate determinate(Automate a) {
         ArrayList<Integer>[] etats = new ArrayList[100];
+        
+        return null;
 
     }
 
