@@ -36,26 +36,48 @@ public class Indexing {
             coordonnees = new ArrayList<Coordonnee>();
             coordonnees.add(new Coordonnee(ligne, colonne));
         }
+
+        public boolean equals(Object obj) {
+            if(obj instanceof String)
+            return (mot.equals((String)obj));
+            return false;
+        }
     }
 
     public static void main(String[] argv) throws IOException
     {
-        BufferedReader lecteurAvecBuffer = null;
-        String ligne;
+        BufferedReader facteurs = null;
+        BufferedReader texte = null;
+        String ligne, mot, facteur_, facteur;
+        String[] mots;
+        int numeroLigne =0;
 
         try
         {
-            lecteurAvecBuffer = new BufferedReader(new FileReader(argv[0]));
+            facteurs = new BufferedReader(new FileReader(".index"));
+             texte = new BufferedReader(new FileReader(argv[0]));
         }
         catch(FileNotFoundException exc)
         {
             System.out.println("Erreur d'ouverture");
         }
-        while ((ligne = lecteurAvecBuffer.readLine()) != null) {
-            System.out.println(ligne);
+
+        ArrayList<Index> indexs = new ArrayList<Index>();
+        while ((facteur_ = facteurs.readLine()) != null) {
+            while((ligne = texte.readLine()) != null) {
+                numeroLigne++;
+                facteur=facteur_.split(" ")[1];
+                mots = ligne.split(" ");
+                for(int numeroColonne=0; numeroColonne<mots.length; numeroColonne++) {
+                    if(!indexs.contains(facteur)) {
+                        //indexs.add(new Index(facteur, numeroLigne, numeroColonne));
+                        //mots[numeroColonne];
+                    }
+                }
+            }
         }
 
-
-        lecteurAvecBuffer.close();
+        facteurs.close();
+        texte.close();
     }
 }
