@@ -164,8 +164,16 @@ public class Automate {
     }
 
     public static Automate determinate(Automate a) {
-        ArrayList<Integer>[] etats = new ArrayList[100];
-        
+        ArrayList<ArrayList<Integer>> etats = new ArrayList<>();
+
+        Automate sortie = new Automate();
+
+        for (int i = 0; i < a.nbStates(); i++) {
+            if (a.debut[i] == true) {
+                // etats
+            }
+        }
+
         return null;
 
     }
