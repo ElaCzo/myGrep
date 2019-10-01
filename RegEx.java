@@ -1,4 +1,3 @@
-package myGrep;
 
 import java.util.Scanner;
 import java.util.ArrayList;

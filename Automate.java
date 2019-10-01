@@ -1,4 +1,3 @@
-package myGrep;
 
 import java.util.ArrayList;
 
@@ -168,7 +167,7 @@ public class Automate {
     public static Automate determinate(Automate a) {
         ArrayList<ArrayList<Integer>> etats = new ArrayList<>();
 
-        Automate sortie = new Automate();
+        Automate sortie = new Automate(1);
 
         for (int i = 0; i < a.nbStates(); i++) {
             if (a.debut[i] == true) {

@@ -1,30 +1,44 @@
-package myGrep;
+
+import java.util.ArrayList;
 
 /**
  * KMP
  */
 public class KMP {
 
-    public static int KMP(String text, char[] factor, int[] rest) {
-        int pos = 0;
-        int i = 0;
+    public static ArrayList<TextPosition> kmp(ArrayList<String> text, char[] factor) {
 
-        for (char c : text.toCharArray()) {
-            if (c == factor[i]) {
-                i++;
-                if (i == factor.length) {
-                    return pos - factor.length;
+        ArrayList<TextPosition> retour = new ArrayList<>();
+
+        int pos = 0;
+        int ligne = 0;
+        int i = 0;
+        int[] reste = retenue(factor);
+
+        for (String t : text) {
+
+            for (char c : t.toCharArray()) {
+                if (c == factor[i]) {
+                    i++;
+                    if (i == factor.length) {
+                        retour.add(new TextPosition(ligne, pos - factor.length));
+                        i = reste[i];
+                        if (i == -1) {
+                            i = 0;
+                        }
+                    }
+                } else {
+                    i = reste[i];
+                    if (i == -1) {
+                        i = 0;
+                    }
                 }
-            } else {
-                i = rest[i];
-                if (i == -1) {
-                    i = 0;
-                }
+                pos++;
             }
-            pos++;
+            ligne++;
         }
 
-        return -1;
+        return retour;
     }
 
     public static int[] retenue(char[] factor) {

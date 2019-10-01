@@ -1,4 +1,3 @@
-package myGrep;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -58,72 +57,72 @@ public class Indexing {
         }
     }
 
-    public static void main(String[] argv) throws IOException
-    {
-        BufferedReader facteurs = null;
-        BufferedReader texte = null;
+    // public static void main(String[] argv) throws IOException
+    // {
+    //     BufferedReader facteurs = null;
+    //     BufferedReader texte = null;
 
-        try
-        {
-            facteurs = new BufferedReader(new FileReader(".index"));
-            texte = new BufferedReader(new FileReader(argv[0]));
-        }
-        catch(FileNotFoundException exc)
-        {
-            System.out.println("Erreur d'ouverture");
-        }
-
-
-        /* Créaction de la table d'indexation avec uniquement les mots et leur fréquence.
-         * Il manque les coordonnées des mots. Elles seront mises à jour juste après. */
-        ArrayList<Index> tableDIndexation = new ArrayList<Index>();
-
-        String ligne, facteur;
-        String[] facteurEtFrequence;
-        int frequence;
-
-        // on crée la table d'indexation à partir des mots trouvés rangés par fréquence :
-        while ((ligne = facteurs.readLine()) != null) {
-            // On récupère les données du fichiers :  la fréquence et le facteur.
-            facteurEtFrequence = ligne.split(" ");
-            frequence = Integer.valueOf(facteurEtFrequence[0]);
-
-            /* si la fréquence du mot n'est pas trop élevée, on place le mot
-             * et sa fréquence dans la table d'indexation */
-            if(frequence < 800 /* /!\ A REGLER !!!! */) {
-                facteur = facteurEtFrequence[1];
-
-                Index i = new Index(facteur, frequence);
-                tableDIndexation.add(i);
-            }
-        }
+    //     try
+    //     {
+    //         facteurs = new BufferedReader(new FileReader(".index"));
+    //         texte = new BufferedReader(new FileReader(argv[0]));
+    //     }
+    //     catch(FileNotFoundException exc)
+    //     {
+    //         System.out.println("Erreur d'ouverture");
+    //     }
 
 
-        /* Il reste la mise à jour des coordonnées : */
-        String[] mots;
-        int numeroLigne =0;
-        while((ligne = texte.readLine()) != null) {
-            // A chaque changement de ligne, on augmente le numéro de la ligne
-            numeroLigne++;
+    //     /* Créaction de la table d'indexation avec uniquement les mots et leur fréquence.
+    //      * Il manque les coordonnées des mots. Elles seront mises à jour juste après. */
+    //     ArrayList<Index> tableDIndexation = new ArrayList<Index>();
 
-            // On récupère la liste de mots de la ligne
-            mots = ligne.split(" ");
+    //     String ligne, facteur;
+    //     String[] facteurEtFrequence;
+    //     int frequence;
 
-            for(int i=0 ; i<mots.length ; i++) {
-                // On récupère l'indice de la première occurence de facteur dans texte
-                int indice = KMP.KMP(ligne, mots[i].toCharArray(), KMP.retenue(mots[i].toCharArray()));
+    //     // on crée la table d'indexation à partir des mots trouvés rangés par fréquence :
+    //     while ((ligne = facteurs.readLine()) != null) {
+    //         // On récupère les données du fichiers :  la fréquence et le facteur.
+    //         facteurEtFrequence = ligne.split(" ");
+    //         frequence = Integer.valueOf(facteurEtFrequence[0]);
 
-                /* si le mot existe sur la ligne,
-                /* indice est un nombre positif représentant le numéro du caractère où le mot commence. */
-                if (indice > -1) {
-                    // si c'est un mot qui mérite d'être dans la table d'indexation (pas trop fréquent)
-                    if (tableDIndexation.contains(mots[i]))
-                        tableDIndexation.get(tableDIndexation.indexOf(mots[i])).coordonnees.add(new Coordonnee(numeroLigne, indice));
-                }
-            }
-        }
+    //         /* si la fréquence du mot n'est pas trop élevée, on place le mot
+    //          * et sa fréquence dans la table d'indexation */
+    //         if(frequence < 800 /* /!\ A REGLER !!!! */) {
+    //             facteur = facteurEtFrequence[1];
 
-        facteurs.close();
-        texte.close();
-    }
+    //             Index i = new Index(facteur, frequence);
+    //             tableDIndexation.add(i);
+    //         }
+    //     }
+
+
+    //     /* Il reste la mise à jour des coordonnées : */
+    //     String[] mots;
+    //     int numeroLigne =0;
+    //     // while((ligne = texte.readLine()) != null) {
+    //     //     // A chaque changement de ligne, on augmente le numéro de la ligne
+    //     //     numeroLigne++;
+
+    //     //     // On récupère la liste de mots de la ligne
+    //     //     mots = ligne.split(" ");
+
+    //     //     for(int i=0 ; i<mots.length ; i++) {
+    //     //         // On récupère l'indice de la première occurence de facteur dans texte
+    //     //         int indice = KMP.kmp(ligne, mots[i].toCharArray(), KMP.retenue(mots[i].toCharArray()));
+
+    //     //         /* si le mot existe sur la ligne,
+    //     //         /* indice est un nombre positif représentant le numéro du caractère où le mot commence. */
+    //     //         if (indice > -1) {
+    //     //             // si c'est un mot qui mérite d'être dans la table d'indexation (pas trop fréquent)
+    //     //             if (tableDIndexation.contains(mots[i]))
+    //     //                 tableDIndexation.get(tableDIndexation.indexOf(mots[i])).coordonnees.add(new Coordonnee(numeroLigne, indice));
+    //     //         }
+    //     //     }
+    //     // }
+
+    //     facteurs.close();
+    //     texte.close();
+    // }
 }

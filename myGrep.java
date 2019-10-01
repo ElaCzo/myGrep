@@ -1,10 +1,10 @@
-package myGrep;
-
 import java.util.Scanner;
+
 import java.io.IOException;
 import java.lang.Exception;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class myGrep {
 
@@ -12,6 +12,7 @@ public class myGrep {
     public static void main(String arg[]) {
         String regEx = "";
         String path = "";
+
         if (arg.length == 2) {
             regEx = arg[0];
             path = arg[1];
@@ -21,21 +22,25 @@ public class myGrep {
 
         }
 
-        String text = "";
+        ArrayList<String> text=null;
+
         try {
 
-            text = new String(Files.readAllBytes(Paths.get(path)));
+            text = new ArrayList<>(Files.readAllLines(Paths.get(path)));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        int i = KMP.KMP(text, regEx.toCharArray(), KMP.retenue(regEx.toCharArray()));
+        ArrayList<TextPosition> pos = KMP.kmp(text, regEx.toCharArray());
 
-        if (i == -1) {
+        if (pos == null) {
             System.out.println("motif non trouvé");
         }
 
         else {
-            System.out.println("motif trouvé a la place : " + i);
+            System.out.println("motif trouvé a la place : ");
+            for (TextPosition p : pos) {
+                System.out.println(text.get(p.ligne));
+            }
         }
     }
 }
