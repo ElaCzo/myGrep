@@ -1,9 +1,12 @@
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import sun.reflect.misc.FieldUtil;
 
 // trier le moins fréquent par le plus fréquent.
 // idée : black list (commune)
@@ -39,6 +42,21 @@ public class Indexing {
             coordonnees = new ArrayList<Coordonnee>();
             coordonnees.add(new Coordonnee(ligne, colonne));
             this.frequence = frequence;
+        }
+
+        public static String createIndex(String path) {
+            String indexPath = path.substring(0, path.lastIndexOf('.'));
+            indexPath = path.substring(path.lastIndexOf('/', path.length()));
+
+            indexPath = String("./index/" + indexPath + ".index");
+
+            File f = new File(indexPath);
+            if (!f.isFile()) {
+                Runtime.getRuntime().exec("./script.bash " + path + " " + indexPath);
+            }
+
+            return indexPath;
+
         }
 
     }

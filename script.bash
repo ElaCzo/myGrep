@@ -1,4 +1,3 @@
 #! bin/bash
-
-cat text/56667-0.txt| tr '[:upper:]' '[:lower:]'|sed 's/\s/\n/g'  | sort | uniq -c | sort -n > .index
+cat $1 | tr '[:upper:]' '[:lower:]'|sed 's/\s/\n/g'  | sort | uniq -c | sort -n > $2
  
