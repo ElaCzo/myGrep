@@ -36,14 +36,8 @@ public class myGrep {
             System.out.println("Methode Index");
 
             String indexPath = Indexing.createIndex(path, text);
-            ArrayList<IndexList> ilist = Indexing.loadIndexList(indexPath);
-
-            for (IndexList il : ilist) {
-                if (regEx.equals(il.mot)) {
-                    pos = il.occurences;
-                    break;
-                }
-            }
+            IndexTree itree = Indexing.loadIndexTree(indexPath);
+            pos = itree.getPositions(regEx);
         }
         if (pos == null && kmpable(regEx)) {
             System.out.println("Methode KMP");

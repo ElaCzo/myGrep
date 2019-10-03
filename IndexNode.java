@@ -1,11 +1,11 @@
 import java.util.ArrayList;
 
-public class IndexList {
+public class IndexNode {
 
     public String mot;
     public ArrayList<TextPosition> occurences;
 
-    public IndexList(String mot) {
+    public IndexNode(String mot) {
         this.mot = mot;
         occurences = new ArrayList<>();
     }

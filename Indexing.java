@@ -21,34 +21,6 @@ import java.nio.file.Paths;
 // tou sles mots sup à une certaines fréquence : check par un humain.
 public class Indexing {
 
-    public static class Index {
-        ArrayList<TextPosition> coordonnees;
-        String mot;
-        int frequence;
-
-        public Index(String mot, int frequence) {
-            this.mot = mot;
-            this.frequence = frequence;
-            coordonnees = new ArrayList<TextPosition>();
-        }
-
-        public Index(String mot, int ligne, int colonne) {
-            this.mot = mot;
-            frequence = 1;
-            coordonnees = new ArrayList<TextPosition>();
-            coordonnees.add(new TextPosition(ligne, colonne));
-        }
-
-        public Index(String mot, int ligne, int colonne, int frequence) {
-            this.mot = mot;
-            frequence = 1;
-            coordonnees = new ArrayList<TextPosition>();
-            coordonnees.add(new TextPosition(ligne, colonne));
-            this.frequence = frequence;
-        }
-
-    }
-
     public static String createIndex(String path, ArrayList<String> text) {
         String indexPath = path.substring(0, path.lastIndexOf('.'));
         indexPath = path.substring(path.lastIndexOf('/') + 1, indexPath.length());
@@ -100,14 +72,14 @@ public class Indexing {
 
     }
 
-    public static ArrayList<IndexList> loadIndexList(String indexPath) {
-        ArrayList<IndexList> indexList = new ArrayList<>();
+    public static ArrayList<IndexNode> loadIndexList(String indexPath) {
+        ArrayList<IndexNode> indexList = new ArrayList<>();
         try {
             ArrayList<String> txt = new ArrayList<>(Files.readAllLines(Paths.get(indexPath)));
 
             for (String line : txt) {
                 String[] columns = line.split("\\s+");
-                IndexList index = new IndexList(columns[0]);
+                IndexNode index = new IndexNode(columns[0]);
 
                 for (int i = 1; i < columns.length; i++) {
                     String[] value = columns[i].split("[(,)]");
@@ -121,6 +93,31 @@ public class Indexing {
             e.printStackTrace();
         }
         return indexList;
+    }
+
+    public static IndexTree loadIndexTree(String indexPath) {
+        IndexTree indexTree = new IndexTree();
+
+        try {
+            ArrayList<String> txt = new ArrayList<>(Files.readAllLines(Paths.get(indexPath)));
+
+            for (String line : txt) {
+                String[] columns = line.split("\\s+");
+                String mot = columns[0];
+                ArrayList<TextPosition> pos = new ArrayList<>();
+
+                for (int i = 1; i < columns.length; i++) {
+                    String[] value = columns[i].split("[(,)]");
+                    pos.add(new TextPosition(Integer.parseInt(value[1]), Integer.parseInt(value[2])));
+                }
+
+                indexTree.inserer(mot,pos);
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return indexTree;
     }
 
 }
