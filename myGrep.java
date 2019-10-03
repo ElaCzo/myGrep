@@ -33,15 +33,30 @@ public class myGrep {
         ArrayList<TextPosition> pos = null;
 
         if (indexable(regEx)) {
+            System.out.println("Methode Index");
 
+            String indexPath = Indexing.createIndex(path, text);
+            ArrayList<IndexList> ilist = Indexing.loadIndexList(indexPath);
+
+            for (IndexList il : ilist) {
+                if (regEx.equals(il.mot)) {
+                    pos = il.occurences;
+                    break;
+                }
+            }
         }
         if (pos == null && kmpable(regEx)) {
+            System.out.println("Methode KMP");
+
             pos = KMP.kmp(text, regEx.toCharArray());
-        } else {
+        }
+        if (pos == null) {
+            System.out.println("Methode Regex");
 
         }
 
         if (pos == null || pos.size() == 0) {
+
             System.out.println("motif non trouvé");
         }
 
