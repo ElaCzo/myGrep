@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.lang.Exception;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
+
 import java.util.ArrayList;
 
 public class myGrep {
@@ -34,17 +37,32 @@ public class myGrep {
 
         if (indexable(regEx)) {
             System.out.println("Methode Index");
+            Instant now = Instant.now();
 
             String indexPath = Indexing.createIndex(path, text);
             IndexTree itree = Indexing.loadIndexTree(indexPath);
+
+            System.out.println(
+                    "Chargement de l'index a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms");
+
+            now = Instant.now();
+
             pos = itree.getPositions(regEx);
+            System.out.println(
+                    "recherge dans l'arbre a pris : " + Duration.between(now, Instant.now()).toNanos() + " µs\n");
+
         }
-        if (pos == null && kmpable(regEx)) {
+
+        if ((pos == null || pos.size() == 0) && kmpable(regEx)) {
             System.out.println("Methode KMP");
 
+            Instant now = Instant.now();
             pos = KMP.kmp(text, regEx.toCharArray());
+            System.out.println(
+                    "recherge avec KMP a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms\n");
+
         }
-        if (pos == null) {
+        if (pos == null || pos.size() == 0) {
             System.out.println("Methode Regex");
 
         }
