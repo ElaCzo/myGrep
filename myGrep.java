@@ -27,8 +27,15 @@ public class myGrep {
 
         ArrayList<String> text = null;
 
+
+        System.out.println("Chargement du texte");
+        Instant now = Instant.now();
+    
         try {
             text = new ArrayList<>(Files.readAllLines(Paths.get(path)));
+            System.out.println(
+                    "Chargement du texte a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms");
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -37,7 +44,7 @@ public class myGrep {
 
         if (indexable(regEx)) {
             System.out.println("Methode Index");
-            Instant now = Instant.now();
+            now = Instant.now();
 
             String indexPath = Indexing.createIndex(path, text);
             IndexTree itree = Indexing.loadIndexTree(indexPath);
@@ -48,6 +55,7 @@ public class myGrep {
             now = Instant.now();
 
             pos = itree.getPositions(regEx);
+            
             System.out.println(
                     "recherge dans l'arbre a pris : " + Duration.between(now, Instant.now()).toNanos() + " µs\n");
 
@@ -56,10 +64,10 @@ public class myGrep {
         if ((pos == null || pos.size() == 0) && kmpable(regEx)) {
             System.out.println("Methode KMP");
 
-            Instant now = Instant.now();
+            now = Instant.now();
             pos = KMP.kmp(text, regEx.toCharArray());
             System.out.println(
-                    "recherge avec KMP a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms\n");
+                    "recherche avec KMP a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms\n");
 
         }
         if (pos == null || pos.size() == 0) {

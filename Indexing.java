@@ -10,6 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // trier le moins fréquent par le plus fréquent.
 // idée : black list (commune)
@@ -46,7 +49,7 @@ public class Indexing {
                 for (String line : txt) {
                     String[] columns = line.split("\\s+");
 
-                    if (columns.length > 2 && Integer.parseInt(columns[1]) < 50) {
+                    if (columns.length > 2 && Integer.parseInt(columns[1]) < 100) {
 
                         String s = columns[2];
                         ArrayList<TextPosition> occ = KMP.kmp(text, s.toCharArray());
@@ -99,9 +102,9 @@ public class Indexing {
         IndexTree indexTree = new IndexTree();
 
         try {
-            ArrayList<String> txt = new ArrayList<>(Files.readAllLines(Paths.get(indexPath)));
+            Stream<String> stream = Files.lines(Paths.get(indexPath));
 
-            for (String line : txt) {
+            for (String line : stream.collect(Collectors.toList())) {
                 String[] columns = line.split("\\s+");
                 String mot = columns[0];
                 ArrayList<TextPosition> pos = new ArrayList<>();
@@ -111,12 +114,13 @@ public class Indexing {
                     pos.add(new TextPosition(Integer.parseInt(value[1]), Integer.parseInt(value[2])));
                 }
 
-                indexTree.inserer(mot,pos);
-
+                indexTree.inserer(mot, pos);
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         return indexTree;
     }
 

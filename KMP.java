@@ -10,7 +10,6 @@ public class KMP {
 
         ArrayList<TextPosition> retour = new ArrayList<>();
 
-        int pos = 0;
         int ligne = 0;
         int i = 0;
         int[] reste = retenue(factor);
@@ -18,6 +17,8 @@ public class KMP {
         for (String t : text) {
 
             for (char c : t.toCharArray()) {
+                int pos = 0;
+
                 if (c == factor[i]) {
                     i++;
                     if (i == factor.length) {
