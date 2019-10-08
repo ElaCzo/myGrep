@@ -59,7 +59,7 @@ public class myGrep {
             pos = itree.getPositions(regEx);
             
             System.out.println(
-                    "recherge dans l'arbre a pris : " + Duration.between(now, Instant.now()).toNanos() + " µs\n");
+                    "Recherche dans l'arbre a pris : " + Duration.between(now, Instant.now()).toNanos() + " µs\n");
 
         }
 
@@ -69,7 +69,7 @@ public class myGrep {
             now = Instant.now();
             pos = KMP.kmp(text, regEx.toCharArray());
             System.out.println(
-                    "recherche avec KMP a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms\n");
+                    "Recherche avec KMP a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms\n");
 
         }
         if (pos == null || pos.size() == 0) {
