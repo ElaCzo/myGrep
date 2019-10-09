@@ -214,8 +214,6 @@ public class Automate {
                 los = (ListOfStates)((ListOfStates)(obj)).clone();
             else
                 return false;
-            /*Collections.sort(los);
-            ListOfStates clone = ((ListOfStates)this.clone());*/
 
             Set<Integer> clone=new HashSet<>(this);
             return los.stream().allMatch(p->clone.remove(p.intValue())
@@ -227,12 +225,6 @@ public class Automate {
     et celles-ci peuvent mener à une transition possédant la même lettre. */
     public Automate determinate(Automate a) {
         Automate result = new Automate(nbStates());
-
-        // voir si utile
-        /*boolean[] markedStates = new boolean[nbStates()];
-        for(int i=0; i<markedStates.length; i++) markedStates[i]=false;
-        // voir si utile
-        ArrayList<Integer> stack = new ArrayList<>();*/
 
         int nbStatesResult = 0;
 
