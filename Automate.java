@@ -31,7 +31,7 @@ public class Automate {
         states[0][(int) a] = 1;
     }
 
-    public Automate concat(Automate A1, Automate A2) {
+    public static Automate concat(Automate A1, Automate A2) {
         Automate sortie = new Automate(A1.nbStates() + A2.nbStates());
 
         for (int i = 0; i < A1.nbStates(); i++) {
@@ -66,7 +66,7 @@ public class Automate {
         return sortie;
     }
 
-    public Automate union(Automate A1, Automate A2) {
+    public static Automate union(Automate A1, Automate A2) {
         Automate sortie = new Automate(A1.nbStates() + A2.nbStates() + 2);
 
         for (int i = 0; i < A1.nbStates(); i++) {
@@ -116,7 +116,7 @@ public class Automate {
         return sortie;
     }
 
-    public Automate closure(Automate a) {
+    public static Automate closure(Automate a) {
         Automate sortie = new Automate(a.nbStates() + 2);
 
         for (int i = 0; i < a.nbStates(); i++) {
@@ -150,7 +150,7 @@ public class Automate {
         return sortie;
     }
 
-    public Automate fromTree(RegExTree t) {
+    public static Automate fromTree(RegExTree t) {
 
         if (t.root == RegEx.CONCAT)
             return concat(fromTree(t.subTrees.get(0)), fromTree(t.subTrees.get(1)));
@@ -162,6 +162,21 @@ public class Automate {
             return concat(fromTree(t.subTrees.get(0)), fromTree(t.subTrees.get(1)));
         else {
             return new Automate((char) t.root);
+        }
+    }
+
+    private class ListOfStates extends ArrayList<Integer>{
+        @Override
+        public boolean equals(Object obj) {
+            ListOfStates los;
+            if(obj instanceof ListOfStates)
+                los = (ListOfStates)((ListOfStates)(obj)).clone();
+            else
+                return false;
+
+            Set<Integer> clone=new HashSet<>(this);
+            return los.stream().allMatch(p->clone.remove(p.intValue())
+                    && clone.isEmpty());
         }
     }
 
@@ -206,24 +221,9 @@ public class Automate {
         return result;
     }
 
-    private class ListOfStates extends ArrayList<Integer>{
-        @Override
-        public boolean equals(Object obj) {
-            ListOfStates los;
-            if(obj instanceof ListOfStates)
-                los = (ListOfStates)((ListOfStates)(obj)).clone();
-            else
-                return false;
-
-            Set<Integer> clone=new HashSet<>(this);
-            return los.stream().allMatch(p->clone.remove(p.intValue())
-                    && clone.isEmpty());
-        }
-    }
-
     /* Il s'agit d'une déterminisation dans un cas précis : un état pour avoir plusieurs epsilon transitions
     et celles-ci peuvent mener à une transition possédant la même lettre. */
-    public Automate determinate(Automate a) {
+    public Automate determinate() {
         Automate result = new Automate(nbStates());
 
         int nbStatesResult = 0;
