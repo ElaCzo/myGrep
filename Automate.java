@@ -31,6 +31,21 @@ public class Automate {
         states[0][(int) a] = 1;
     }
 
+    private Automate(Automate a, int n) {
+        this.states = new int[n][256];
+        this.debut = new boolean[n];
+        this.fin = new boolean[n];
+        this.epsilon = new ArrayList[n];
+        for (int i = 0; i < n; i++) {
+            epsilon[i] = a.epsilon[i];
+            fin[i] = a.fin[i];
+            debut[i] = a.debut[i];
+            for (int j = 0; j < 256; j++) {
+                this.states[i][j] = a.states[i][j];
+            }
+        }
+    }
+
     public static Automate concat(Automate A1, Automate A2) {
         Automate sortie = new Automate(A1.nbStates() + A2.nbStates());
 
@@ -253,7 +268,9 @@ public class Automate {
             }
         }
 
-        return result;
+        Automate resultRightNumberOfStates = new Automate(result, nbStatesResult);
+
+        return resultRightNumberOfStates;
     }
 
     public int nbStates() {
