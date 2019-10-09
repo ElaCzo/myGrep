@@ -1,6 +1,7 @@
 package myGrep;
 
-import java.util.ArrayList;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Automate {
     int[][] states;
@@ -162,22 +163,105 @@ public class Automate {
         else {
             return new Automate((char) t.root);
         }
-
     }
 
-    public static Automate determinate(Automate a) {
-        ArrayList<ArrayList<Integer>> etats = new ArrayList<>();
+    private ListOfStates statesReachingLetter(int state, int letter){
+        ListOfStates result = new ListOfStates();
 
-        Automate sortie = new Automate(1);
+        boolean marked[] = new boolean[nbStates()];
 
-        for (int i = 0; i < a.nbStates(); i++) {
-            if (a.debut[i] == true) {
-                // etats
+        for(int i=0; i<nbStates(); i++){
+            marked[i]=false;
+        }
+
+        if(states[state][letter]!=-1)
+            result.add(states[state][letter]);
+
+        ArrayList<Integer> stack = new ArrayList<>();
+
+        // Màj pile et marquage
+        stack.addAll(epsilon[state]);
+        for(int e : epsilon[state])
+            marked[e]=true;
+
+        int stateFromEpsilon=-1;
+
+        // Tant qu'il reste des états à parcourir (venant de transitions epsilon)
+        while(!stack.isEmpty()) {
+            stateFromEpsilon = stack.remove(stack.size() - 1);
+            assert (stateFromEpsilon != -1);
+
+            // On ajoute l'état s'il exitste une transition pour la lettre
+            if (states[state][letter] != -1)
+                result.add(states[state][letter]);
+
+            // On ajoute les états epsilon suivants si non marqués et marquage
+            for(int e : epsilon[stateFromEpsilon]) {
+                if(!marked[e])
+                    stack.add(e);
+                marked[e] = true;
             }
         }
 
-        return null;
+        return result;
+    }
 
+    private class ListOfStates extends ArrayList<Integer>{
+        @Override
+        public boolean equals(Object obj) {
+            ListOfStates los;
+            if(obj instanceof ListOfStates)
+                los = (ListOfStates)((ListOfStates)(obj)).clone();
+            else
+                return false;
+            /*Collections.sort(los);
+            ListOfStates clone = ((ListOfStates)this.clone());*/
+
+            Set<Integer> clone=new HashSet<>(this);
+            return los.stream().allMatch(p->clone.remove(p.intValue())
+                    && clone.isEmpty());
+        }
+    }
+
+    /* Il s'agit d'une déterminisation dans un cas précis : un état pour avoir plusieurs epsilon transitions
+    et celles-ci peuvent mener à une transition possédant la même lettre. */
+    public Automate determinate(Automate a) {
+        Automate result = new Automate(nbStates());
+
+        // voir si utile
+        /*boolean[] markedStates = new boolean[nbStates()];
+        for(int i=0; i<markedStates.length; i++) markedStates[i]=false;
+        // voir si utile
+        ArrayList<Integer> stack = new ArrayList<>();*/
+
+        int nbStatesResult = 0;
+
+        HashMap<ListOfStates, Integer> statesNDAToDA = new HashMap<>();
+        int[] statesDAToNDA = new int[nbStates()];
+        for(int i=0; i<statesDAToNDA.length; i++) statesDAToNDA[i]=-1;
+
+        // pour chaque état
+        for (int i = 0; i < nbStates(); i++) {
+            for(int l = 0; l < 256; l++) {
+                ListOfStates statesNDA=statesReachingLetter(i, l);
+
+                // vérifier si ça marche bien le contains.
+                if(!statesNDAToDA.containsKey(statesNDA))
+                    statesNDAToDA.put(statesNDA, nbStatesResult++); // on associe un nouvel état
+
+                result.states[statesNDAToDA.get(statesNDA)][l]= statesNDAToDA.get(statesNDA);
+
+                // On vérifie si c'est un état initial ou final
+                for(Integer s : statesNDA){
+                    if (debut[s])
+                        result.debut[statesNDAToDA.get(statesNDA)]=true;
+                    if (fin[s])
+                        result.fin[statesNDAToDA.get(statesNDA)]=true;
+                }
+            }
+        }
+
+        return result;
     }
 
     public int nbStates() {
