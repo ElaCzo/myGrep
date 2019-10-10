@@ -1,7 +1,6 @@
 package myGrep;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Automate {
     int[][] states;
@@ -180,12 +179,12 @@ public class Automate {
         }
     }
 
-    private class ListOfStates extends ArrayList<Integer>{
+    private class SetOfStates extends ArrayList<Integer>{
         @Override
         public boolean equals(Object obj) {
-            ListOfStates los;
-            if(obj instanceof ListOfStates)
-                los = (ListOfStates)((ListOfStates)(obj)).clone();
+            SetOfStates los;
+            if(obj instanceof SetOfStates)
+                los = (SetOfStates)((SetOfStates)(obj)).clone();
             else
                 return false;
 
@@ -195,8 +194,8 @@ public class Automate {
         }
     }
 
-    private ListOfStates statesReachingLetter(int state, int letter){
-        ListOfStates result = new ListOfStates();
+    private SetOfStates statesReachingLetter(int state, int letter){
+        SetOfStates result = new SetOfStates();
 
         boolean marked[] = new boolean[nbStates()];
 
@@ -243,14 +242,14 @@ public class Automate {
 
         int nbStatesResult = 0;
 
-        HashMap<ListOfStates, Integer> statesNDAToDA = new HashMap<>();
+        HashMap<SetOfStates, Integer> statesNDAToDA = new HashMap<>();
         int[] statesDAToNDA = new int[nbStates()];
         for(int i=0; i<statesDAToNDA.length; i++) statesDAToNDA[i]=-1;
 
         // pour chaque état
         for (int i = 0; i < nbStates(); i++) {
             for(int l = 0; l < 256; l++) {
-                ListOfStates statesNDA=statesReachingLetter(i, l);
+                SetOfStates statesNDA=statesReachingLetter(i, l);
 
                 // vérifier si ça marche bien le contains.
                 if(!statesNDAToDA.containsKey(statesNDA))
@@ -271,6 +270,121 @@ public class Automate {
         Automate resultRightNumberOfStates = new Automate(result, nbStatesResult);
 
         return resultRightNumberOfStates;
+    }
+
+    private class Couple {
+        SetOfStates set;
+        int letter;
+
+        public Couple(SetOfStates set, int letter) {
+            this.set = set;
+            this.letter = letter;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Couple))
+                return false;
+            return ((Couple) obj).set.equals(set) && ((Couple) obj).letter == letter;
+        }
+    }
+
+    public Automate minimizate() {
+        ArrayList<SetOfStates> partition = new ArrayList<>();
+
+        // on crée et remplit 2 partition au hasard
+        partition.set(0, new SetOfStates());
+        partition.set(1, new SetOfStates());
+        for (int i = 0; i < nbStates(); i++)
+            if (fin[i])
+                partition.get(0).add(i);
+            else
+                partition.get(1).add(i);
+
+
+        ArrayList<Couple> W = new ArrayList<>();
+
+        // On veut l'ensemble le plus petit
+        SetOfStates smallerSet;
+        if (partition.get(0).size() < partition.get(1).size())
+            smallerSet = partition.get(0);
+        else
+            smallerSet = partition.get(1);
+
+        // On remplit W
+        for (int l = 0; l < 256; l++) {
+            W.add(new Couple(smallerSet, l));
+        }
+
+        SetOfStates x1 = new SetOfStates();
+        SetOfStates x2 = new SetOfStates();
+        while (!W.isEmpty()) {
+            Couple Za = W.remove(W.size() - 1);
+
+            for (SetOfStates x : partition) {
+
+                x1 = new SetOfStates();
+                x2 = new SetOfStates();
+                for (int s : x) {
+                    if (Za.set.contains(states[s][Za.letter]))
+                        x1.add(s);
+                    else
+                        x2.add(s);
+                }
+
+                // On met à jour la partition
+                if (!x1.isEmpty() && !x2.isEmpty()) {
+                    partition.remove(x);
+                    partition.add(x1);
+                    partition.add(x2);
+                }
+
+                // On met à jour W :
+                Couple c;
+                smallerSet = partition.get(0);
+                for (SetOfStates set : partition)
+                    if (set.size() < smallerSet.size())
+                        smallerSet = set;
+
+                for (int m = 0; m < 256; m++) {
+                    c = new Couple(x, m);
+
+                    if (W.contains(c)) {
+                        W.remove(c);
+                        W.add(new Couple(x1, m));
+                        W.add(new Couple(x2, m));
+                    } else {
+                        W.add(new Couple(smallerSet, m));
+                    }
+                }
+            }
+        }
+
+        Automate result = new Automate(partition.size());
+        int iOfResult=-1;
+        for(int i=0; i<nbStates(); i++){
+            for (SetOfStates s : partition)
+                if (s.contains(i)) {
+                    iOfResult = partition.indexOf(s);
+                    break;
+                }
+            if(debut[i])
+                result.debut[iOfResult]=true;
+            for(int l=0; l<256; l++){
+                if (states[i][l] != -1) {
+                    for (SetOfStates s : partition) {
+                        if (s.contains(result.states[i][l])) {
+                            result.states[iOfResult][l] = partition.indexOf(s);
+                            break;
+                        }
+                    }
+                }
+            }
+            if(fin[i])
+                result.fin[iOfResult]=true;
+        }
+
+        return result;
     }
 
     public int nbStates() {
