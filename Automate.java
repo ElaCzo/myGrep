@@ -74,7 +74,8 @@ public class Automate {
                 }
             }
             sortie.fin[i + A1.nbStates()] = A2.fin[i];
-            sortie.epsilon[i + A1.nbStates()].addAll(A2.epsilon[i]);
+            for(int s : A2.epsilon[i])
+                sortie.epsilon[i + A1.nbStates()].add(s+A1.nbStates());
         }
 
         return sortie;
