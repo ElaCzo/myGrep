@@ -95,11 +95,11 @@ public class Automate {
         for (int i = 0; i < A2.nbStates(); i++) {
             for (int j = 0; j < 256; j++) {
                 if (A2.states[i][j] != -1) {
-
                     sortie.states[i + A1.nbStates()][j] = A2.states[i][j] + A1.nbStates();
                 }
             }
-            sortie.epsilon[i + A1.nbStates()].addAll(A2.epsilon[i]);
+            for(int s : A2.epsilon[i])
+                sortie.epsilon[i + A1.nbStates()].add(s+A1.nbStates());
         }
 
         sortie.debut[sortie.nbStates() - 2] = true;
@@ -119,11 +119,11 @@ public class Automate {
 
         for (int i = 0; i < A2.nbStates(); i++) {
 
-            if (A1.debut[i] == true) {
+            if (A2.debut[i] == true) {
                 sortie.epsilon[sortie.nbStates() - 2].add(i + A1.nbStates());
             }
 
-            if (A1.fin[i] == true) {
+            if (A2.fin[i] == true) {
                 sortie.epsilon[i + A1.nbStates()].add(sortie.nbStates() - 1);
             }
         }
