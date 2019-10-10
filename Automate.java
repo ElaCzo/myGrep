@@ -154,7 +154,7 @@ public class Automate {
                 sortie.epsilon[i].add(sortie.nbStates() - 1);
                 for (int j = 0; j < a.nbStates(); j++) {
                     if (a.debut[j] == true) {
-                        sortie.epsilon[j].add(i);
+                        sortie.epsilon[i].add(j);
                     }
                 }
             }
@@ -267,9 +267,10 @@ public class Automate {
             }
         }
 
-        Automate resultRightNumberOfStates = new Automate(result, nbStatesResult);
+        return result;
+        //Automate resultRightNumberOfStates = new Automate(result, nbStatesResult);
 
-        return resultRightNumberOfStates;
+        //return resultRightNumberOfStates;
     }
 
     private class Couple {
@@ -287,12 +288,17 @@ public class Automate {
                 return false;
             return ((Couple) obj).set.equals(set) && ((Couple) obj).letter == letter;
         }
+
+        @Override
+        public int hashCode(){
+            return set.hashCode()+letter;
+        }
     }
 
     public Automate minimizate() {
         ArrayList<SetOfStates> partition = new ArrayList<>();
 
-        // on crée et remplit 2 partition au hasard
+        // on crée et remplit 2 partitions au hasard
         partition.set(0, new SetOfStates());
         partition.set(1, new SetOfStates());
         for (int i = 0; i < nbStates(); i++)
@@ -316,8 +322,7 @@ public class Automate {
             W.add(new Couple(smallerSet, l));
         }
 
-        SetOfStates x1 = new SetOfStates();
-        SetOfStates x2 = new SetOfStates();
+        SetOfStates x1, x2;
         while (!W.isEmpty()) {
             Couple Za = W.remove(W.size() - 1);
 
@@ -401,7 +406,7 @@ public class Automate {
                     s += " [ " + (char) j + " : " + this.states[i][j] + " ] ";
                 }
             }
-            s += "| epsilons :" + epsilon[i].toString();
+            s += "| epsilons :" + epsilon[i].toString()+" ";
             if (this.debut[i] == true) {
                 s += "| deb";
             }
@@ -415,5 +420,4 @@ public class Automate {
 
         return s;
     }
-
 }

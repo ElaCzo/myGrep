@@ -29,7 +29,6 @@ public class myGrep {
 
         ArrayList<String> text = null;
 
-
         System.out.println("Chargement du texte");
         Instant now = Instant.now();
     
@@ -44,7 +43,7 @@ public class myGrep {
 
         ArrayList<TextPosition> pos = null;
 
-        if (indexable(regEx)) {
+        /*if (indexable(regEx)) {
             System.out.println("Methode Index");
             now = Instant.now();
 
@@ -71,10 +70,35 @@ public class myGrep {
             System.out.println(
                     "Recherche avec KMP a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms\n");
 
-        }
+        }*/
         if (pos == null || pos.size() == 0) {
             System.out.println("Methode Regex");
 
+            try {
+                Automate a =Automate.fromTree(new RegEx(regEx).parse());
+                System.out.println(a);
+                /*for(int i=0; i<a.nbStates(); i++) {
+                    System.out.print(a.states[i]['S'] + " ");
+                    System.out.print(a.states[i]['a'] + " ");
+                    System.out.print(a.states[i]['g'] + " ");
+                    System.out.print(a.states[i]['r'] + " ");
+                    System.out.print(a.states[i]['o'] + " ");
+                    System.out.print(a.states[i]['n'] + " ");
+                    System.out.println();
+                }*/
+                /*a=a.determinate();
+                for(int i=0; i<a.nbStates(); i++) {
+                    System.out.print(a.states[i]['S'] + " ");
+                    System.out.print(a.states[i]['a'] + " ");
+                    System.out.print(a.states[i]['g'] + " ");
+                    System.out.print(a.states[i]['r'] + " ");
+                    System.out.print(a.states[i]['o'] + " ");
+                    System.out.print(a.states[i]['n'] + " ");
+                    System.out.println();
+                }*/
+                //System.out.println(a.determinate().minimizate());
+            }
+            catch(Exception e){}
         }
 
         if (pos == null || pos.size() == 0) {
