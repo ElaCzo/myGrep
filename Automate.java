@@ -307,7 +307,7 @@ public class Automate {
     }
 
     /* Algorithme de Hopcroft. */
-    public Automate minimizate() {
+    public Automate minimize() {
         ArrayList<SetOfStates> partition = new ArrayList<>();
 
         // on crée et remplit 2 partitions

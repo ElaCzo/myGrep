@@ -78,7 +78,7 @@ public class myGrep {
                 System.out.println(a);
                 a=a.determinize();
                 System.out.println(a);
-                a=a.minimizate();
+                a=a.minimize();
                 System.out.println(a);
                 // je suis en train d'écrire la recherche dans le texte, il manque que ça :)
             }
