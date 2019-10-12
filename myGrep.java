@@ -1,7 +1,5 @@
 package myGrep;
 
-import java.util.Scanner;
-
 import java.io.IOException;
 import java.lang.Exception;
 import java.nio.file.Files;
@@ -86,7 +84,7 @@ public class myGrep {
                     System.out.print(a.states[i]['n'] + " ");
                     System.out.println();
                 }*/
-                a=a.determinate();
+                a=a.determinize();
                 System.out.println(a);
                 a=a.minimizate();
                 System.out.println(a);

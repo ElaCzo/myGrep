@@ -231,7 +231,7 @@ public class Automate {
 
     /* Il s'agit d'une déterminisation dans un cas précis : un état pour avoir plusieurs epsilon transitions
     et celles-ci peuvent mener à une transition possédant la même lettre. */
-    public Automate determinate() {
+    public Automate determinize() {
         Automate result = new Automate(nbStates());
         int nbStatesResult = 0;
 
@@ -245,6 +245,7 @@ public class Automate {
                 statesNDA = statesReachingEpsilon(i);
                 stack.add(statesNDA);
                 statesNDAToDA.add(statesNDA);
+                result.debut[statesNDAToDA.indexOf(statesNDA)] = true;
                 break;
             }
         }
@@ -351,7 +352,6 @@ public class Automate {
                     partition.remove(x);
                     partition.add(x1);
                     partition.add(x2);
-
 
                     // On met à jour W :
                     Couple c;
