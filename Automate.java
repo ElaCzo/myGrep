@@ -306,6 +306,7 @@ public class Automate {
         }
     }
 
+    /* Algorithme de Hopcroft. */
     public Automate minimizate() {
         ArrayList<SetOfStates> partition = new ArrayList<>();
 
@@ -376,8 +377,6 @@ public class Automate {
         }
 
         Automate result = new Automate(partition.size());
-        System.out.println(partition);
-        System.out.flush();
 
         int resultState=-1;
         for (SetOfStates set : partition){
@@ -401,9 +400,6 @@ public class Automate {
                     result.fin[resultState]=true;
             }
         }
-
-        System.out.println(result);
-        System.out.flush();
 
         return result;
 }

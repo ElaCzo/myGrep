@@ -80,7 +80,6 @@ public class myGrep {
                 System.out.println(a);
                 a=a.minimizate();
                 System.out.println(a);
-
                 // je suis en train d'écrire la recherche dans le texte, il manque que ça :)
             }
             catch(Exception e){}
