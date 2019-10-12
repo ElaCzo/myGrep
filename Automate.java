@@ -184,19 +184,21 @@ public class Automate {
     private class SetOfStates extends HashSet<Integer>{}
 
     private SetOfStates statesReachingEpsilon(int state) {
-        boolean marked[] = new boolean[nbStates()];
-        for(int i=0; i<nbStates(); i++){
-            marked[i]=false;
-        }
-        return statesReachingEpsilon(state, marked);
-    }
+        SetOfStates result = new SetOfStates();
 
-    private SetOfStates statesReachingLetter(int state, int letter) {
         boolean marked[] = new boolean[nbStates()];
         for(int i=0; i<nbStates(); i++){
             marked[i]=false;
         }
-        return statesReachingLetter(state, letter, marked);
+
+        marked[state]=true;
+
+        for(int e : epsilon[state]) {
+            SetOfStates r = statesReachingEpsilon(e, marked);
+            result.addAll(r);
+        }
+
+        return result;
     }
 
     private SetOfStates statesReachingEpsilon(int state, boolean marked[]){
@@ -206,35 +208,22 @@ public class Automate {
             return new SetOfStates();
 
         result.add(state);
-
+        marked[state]=true;
 
         for(int e : epsilon[state]) {
             SetOfStates r = statesReachingEpsilon(e, marked);
-
             result.addAll(r);
         }
 
         return result;
     }
 
-    private SetOfStates statesReachingLetter(int state, int letter, boolean marked[]){
+    private SetOfStates statesReachingLetter(int state, int letter){
         SetOfStates result = new SetOfStates();
 
         if(states[state][letter]!=-1) {
             result.add(states[state][letter]);
             result.addAll(statesReachingEpsilon(states[state][letter]));
-        }
-
-        marked[state]=true;
-        for(int e : epsilon[state]) {
-            if(!marked[e]) {
-                SetOfStates r = statesReachingLetter(e, letter, marked);
-                if(!r.isEmpty()) {
-                    result.addAll(statesReachingEpsilon(e));
-                    result.addAll(r);
-                }
-                marked[e]=true;
-            }
         }
 
         return result;
@@ -272,12 +261,9 @@ public class Automate {
                         if(!resultStatesNDA.contains(st))
                             resultStatesNDA.add(st);
                 }
-                // on retire les états présents aussi dans ceux de départ:
-                resultStatesNDA.removeAll(set);
                 if (!resultStatesNDA.isEmpty()) {
                     // vérifier si ça marche bien le contains.
                     if (!statesNDAToDA.contains(resultStatesNDA)) {
-
                         statesNDAToDA.add(resultStatesNDA); // on associe un nouvel état
                         stack.add(resultStatesNDA);
                     }
@@ -294,7 +280,7 @@ public class Automate {
             }
         }
 
-        Automate resultRightNumberOfStates = new Automate(result, nbStatesResult);
+        Automate resultRightNumberOfStates = new Automate(result, statesNDAToDA.size());
         return resultRightNumberOfStates;
     }
 
