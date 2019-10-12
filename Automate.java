@@ -1,5 +1,6 @@
 package myGrep;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Automate {
@@ -180,56 +181,59 @@ public class Automate {
         }
     }
 
-    private class SetOfStates extends ArrayList<Integer>{
-        @Override
-        public boolean equals(Object obj) {
-            SetOfStates los;
-            if(obj instanceof SetOfStates)
-                los = (SetOfStates)((SetOfStates)(obj)).clone();
-            else
-                return false;
+    private class SetOfStates extends HashSet<Integer>{}
 
-            Set<Integer> clone=new HashSet<>(this);
-            return los.stream().allMatch(p->clone.remove(p.intValue())
-                    && clone.isEmpty());
-        }
-    }
-
-    private SetOfStates statesReachingLetter(int state, int letter){
-        SetOfStates result = new SetOfStates();
-
+    private SetOfStates statesReachingEpsilon(int state) {
         boolean marked[] = new boolean[nbStates()];
-
         for(int i=0; i<nbStates(); i++){
             marked[i]=false;
         }
+        return statesReachingEpsilon(state, marked);
+    }
 
-        if(states[state][letter]!=-1)
+    private SetOfStates statesReachingLetter(int state, int letter) {
+        boolean marked[] = new boolean[nbStates()];
+        for(int i=0; i<nbStates(); i++){
+            marked[i]=false;
+        }
+        return statesReachingLetter(state, letter, marked);
+    }
+
+    private SetOfStates statesReachingEpsilon(int state, boolean marked[]){
+        SetOfStates result = new SetOfStates();
+
+        if(marked[state])
+            return new SetOfStates();
+
+        result.add(state);
+
+
+        for(int e : epsilon[state]) {
+            SetOfStates r = statesReachingEpsilon(e, marked);
+
+            result.addAll(r);
+        }
+
+        return result;
+    }
+
+    private SetOfStates statesReachingLetter(int state, int letter, boolean marked[]){
+        SetOfStates result = new SetOfStates();
+
+        if(states[state][letter]!=-1) {
             result.add(states[state][letter]);
+            result.addAll(statesReachingEpsilon(states[state][letter]));
+        }
 
-        ArrayList<Integer> stack = new ArrayList<>();
-
-        // Màj pile et marquage
-        stack.addAll(epsilon[state]);
-        for(int e : epsilon[state])
-            marked[e]=true;
-
-        int stateFromEpsilon=-1;
-
-        // Tant qu'il reste des états à parcourir (venant de transitions epsilon)
-        while(!stack.isEmpty()) {
-            stateFromEpsilon = stack.remove(stack.size() - 1);
-            assert (stateFromEpsilon != -1);
-
-            // On ajoute l'état s'il exitste une transition pour la lettre
-            if (states[state][letter] != -1)
-                result.add(states[state][letter]);
-
-            // On ajoute les états epsilon suivants si non marqués et marquage
-            for(int e : epsilon[stateFromEpsilon]) {
-                if(!marked[e])
-                    stack.add(e);
-                marked[e] = true;
+        marked[state]=true;
+        for(int e : epsilon[state]) {
+            if(!marked[e]) {
+                SetOfStates r = statesReachingLetter(e, letter, marked);
+                if(!r.isEmpty()) {
+                    result.addAll(statesReachingEpsilon(e));
+                    result.addAll(r);
+                }
+                marked[e]=true;
             }
         }
 
@@ -240,38 +244,58 @@ public class Automate {
     et celles-ci peuvent mener à une transition possédant la même lettre. */
     public Automate determinate() {
         Automate result = new Automate(nbStates());
-
         int nbStatesResult = 0;
 
-        HashMap<SetOfStates, Integer> statesNDAToDA = new HashMap<>();
-        int[] statesDAToNDA = new int[nbStates()];
-        for(int i=0; i<statesDAToNDA.length; i++) statesDAToNDA[i]=-1;
+        ArrayList<SetOfStates> statesNDAToDA = new ArrayList<>();
 
-        // pour chaque état
+        ArrayList<SetOfStates> stack = new ArrayList<>();
+        // On cherche le début
         for (int i = 0; i < nbStates(); i++) {
-            for(int l = 0; l < 256; l++) {
-                SetOfStates statesNDA=statesReachingLetter(i, l);
-
-                // vérifier si ça marche bien le contains.
-                if(!statesNDAToDA.containsKey(statesNDA))
-                    statesNDAToDA.put(statesNDA, nbStatesResult++); // on associe un nouvel état
-
-                result.states[statesNDAToDA.get(statesNDA)][l]= statesNDAToDA.get(statesNDA);
-
-                // On vérifie si c'est un état initial ou final
-                for(Integer s : statesNDA){
-                    if (debut[s])
-                        result.debut[statesNDAToDA.get(statesNDA)]=true;
-                    if (fin[s])
-                        result.fin[statesNDAToDA.get(statesNDA)]=true;
-                }
+            SetOfStates statesNDA;
+            if(debut[i]) {
+                statesNDA = statesReachingEpsilon(i);
+                stack.add(statesNDA);
+                statesNDAToDA.add(statesNDA);
+                break;
             }
         }
 
-        return result;
-        //Automate resultRightNumberOfStates = new Automate(result, nbStatesResult);
+        // tant que la pile n'est pas vide
+        SetOfStates set;
+        while(!stack.isEmpty()){
+            set=stack.remove(stack.size()-1);
+            for (int l = 0; l < 256; l++) {
+                SetOfStates resultStatesNDA = new SetOfStates();
+                for(int s : set) {
+                    SetOfStates statesNDA = statesReachingLetter(s, l);
+                    for(int st : statesNDA)
+                        if(!resultStatesNDA.contains(st))
+                            resultStatesNDA.add(st);
+                }
+                // on retire les états présents aussi dans ceux de départ:
+                resultStatesNDA.removeAll(set);
+                if (!resultStatesNDA.isEmpty()) {
+                    // vérifier si ça marche bien le contains.
+                    if (!statesNDAToDA.contains(resultStatesNDA)) {
 
-        //return resultRightNumberOfStates;
+                        statesNDAToDA.add(resultStatesNDA); // on associe un nouvel état
+                        stack.add(resultStatesNDA);
+                    }
+                    result.states[statesNDAToDA.indexOf(set)][l] = statesNDAToDA.indexOf(resultStatesNDA);
+                }
+            }
+
+            // On vérifie si c'est un état initial ou final
+            for (Integer st : set) {
+                if (debut[st])
+                    result.debut[statesNDAToDA.indexOf(set)] = true;
+                if (fin[st])
+                    result.fin[statesNDAToDA.indexOf(set)] = true;
+            }
+        }
+
+        Automate resultRightNumberOfStates = new Automate(result, nbStatesResult);
+        return resultRightNumberOfStates;
     }
 
     private class Couple {

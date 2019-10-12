@@ -86,8 +86,10 @@ public class myGrep {
                     System.out.print(a.states[i]['n'] + " ");
                     System.out.println();
                 }*/
-                /*a=a.determinate();
-                for(int i=0; i<a.nbStates(); i++) {
+                a=a.determinate();
+                //a.minimizate();
+                System.out.println(a);
+                /*for(int i=0; i<a.nbStates(); i++) {
                     System.out.print(a.states[i]['S'] + " ");
                     System.out.print(a.states[i]['a'] + " ");
                     System.out.print(a.states[i]['g'] + " ");
