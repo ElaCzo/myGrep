@@ -262,7 +262,6 @@ public class Automate {
                             resultStatesNDA.add(st);
                 }
                 if (!resultStatesNDA.isEmpty()) {
-                    // vérifier si ça marche bien le contains.
                     if (!statesNDAToDA.contains(resultStatesNDA)) {
                         statesNDAToDA.add(resultStatesNDA); // on associe un nouvel état
                         stack.add(resultStatesNDA);
@@ -309,15 +308,14 @@ public class Automate {
     public Automate minimizate() {
         ArrayList<SetOfStates> partition = new ArrayList<>();
 
-        // on crée et remplit 2 partitions au hasard
-        partition.set(0, new SetOfStates());
-        partition.set(1, new SetOfStates());
+        // on crée et remplit 2 partitions
+        partition.add(new SetOfStates());
+        partition.add(new SetOfStates());
         for (int i = 0; i < nbStates(); i++)
             if (fin[i])
                 partition.get(0).add(i);
             else
                 partition.get(1).add(i);
-
 
         ArrayList<Couple> W = new ArrayList<>();
 
@@ -329,13 +327,12 @@ public class Automate {
             smallerSet = partition.get(1);
 
         // On remplit W
-        for (int l = 0; l < 256; l++) {
+        for (int l = 0; l < 256; l++)
             W.add(new Couple(smallerSet, l));
-        }
 
         SetOfStates x1, x2;
         while (!W.isEmpty()) {
-            Couple Za = W.remove(W.size() - 1);
+            Couple Za = W.remove(W.size() - 1);;
 
             for (SetOfStates x : partition) {
 
@@ -348,60 +345,68 @@ public class Automate {
                         x2.add(s);
                 }
 
+                // si X est bien coupé par Za :
                 // On met à jour la partition
                 if (!x1.isEmpty() && !x2.isEmpty()) {
                     partition.remove(x);
                     partition.add(x1);
                     partition.add(x2);
-                }
 
-                // On met à jour W :
-                Couple c;
-                smallerSet = partition.get(0);
-                for (SetOfStates set : partition)
-                    if (set.size() < smallerSet.size())
-                        smallerSet = set;
 
-                for (int m = 0; m < 256; m++) {
-                    c = new Couple(x, m);
+                    // On met à jour W :
+                    Couple c;
+                    smallerSet = partition.get(0);
+                    for (SetOfStates set : partition)
+                        if (set.size() < smallerSet.size())
+                            smallerSet = set;
 
-                    if (W.contains(c)) {
-                        W.remove(c);
-                        W.add(new Couple(x1, m));
-                        W.add(new Couple(x2, m));
-                    } else {
-                        W.add(new Couple(smallerSet, m));
+                    for (int m = 0; m < 256; m++) {
+                        c = new Couple(x, m);
+
+                        if (W.contains(c)) {
+                            W.remove(c);
+                            W.add(new Couple(x1, m));
+                            W.add(new Couple(x2, m));
+                        } else {
+                            W.add(new Couple(smallerSet, m));
+                        }
                     }
                 }
             }
         }
 
         Automate result = new Automate(partition.size());
-        int iOfResult=-1;
-        for(int i=0; i<nbStates(); i++){
-            for (SetOfStates s : partition)
-                if (s.contains(i)) {
-                    iOfResult = partition.indexOf(s);
-                    break;
-                }
-            if(debut[i])
-                result.debut[iOfResult]=true;
-            for(int l=0; l<256; l++){
-                if (states[i][l] != -1) {
-                    for (SetOfStates s : partition) {
-                        if (s.contains(result.states[i][l])) {
-                            result.states[iOfResult][l] = partition.indexOf(s);
-                            break;
-                        }
+        System.out.println(partition);
+        System.out.flush();
+
+        int resultState=-1;
+        for (SetOfStates set : partition){
+            resultState = partition.indexOf(set);
+            for(int state : set){
+                if(debut[state])
+                    result.debut[resultState]=true;
+
+                for(int l=0; l<256; l++){
+                    int stateOut = states[state][l];
+                    if (stateOut != -1) {
+                        for(SetOfStates s : partition)
+                            if(s.contains(stateOut)) {
+                                result.states[resultState][l] = partition.indexOf(s);
+                                break;
+                            }
                     }
                 }
+
+                if(fin[state])
+                    result.fin[resultState]=true;
             }
-            if(fin[i])
-                result.fin[iOfResult]=true;
         }
 
+        System.out.println(result);
+        System.out.flush();
+
         return result;
-    }
+}
 
     public int nbStates() {
         return epsilon.length;
