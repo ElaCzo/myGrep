@@ -243,6 +243,7 @@ public class Automate {
             SetOfStates statesNDA;
             if(debut[i]) {
                 statesNDA = statesReachingEpsilon(i);
+                statesNDA.add(i);
                 stack.add(statesNDA);
                 statesNDAToDA.add(statesNDA);
                 result.debut[statesNDAToDA.indexOf(statesNDA)] = true;
