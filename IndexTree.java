@@ -1,3 +1,5 @@
+package myGrep;
+
 import java.util.ArrayList;
 
 public class IndexTree {

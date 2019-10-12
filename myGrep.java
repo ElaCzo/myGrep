@@ -1,4 +1,4 @@
-import java.util.Scanner;
+package myGrep;
 
 import java.io.IOException;
 import java.lang.Exception;
@@ -26,7 +26,6 @@ public class myGrep {
         }
 
         ArrayList<String> text = null;
-
 
         System.out.println("Chargement du texte");
         Instant now = Instant.now();
@@ -57,7 +56,7 @@ public class myGrep {
             pos = itree.getPositions(regEx);
             
             System.out.println(
-                    "recherge dans l'arbre a pris : " + Duration.between(now, Instant.now()).toNanos() + " µs\n");
+                    "Recherche dans l'arbre a pris : " + Duration.between(now, Instant.now()).toNanos() + " µs\n");
 
         }
 
@@ -67,12 +66,24 @@ public class myGrep {
             now = Instant.now();
             pos = KMP.kmp(text, regEx.toCharArray());
             System.out.println(
-                    "recherche avec KMP a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms\n");
+                    "Recherche avec KMP a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms\n");
 
         }
+
         if (pos == null || pos.size() == 0) {
             System.out.println("Methode Regex");
 
+            try {
+                Automate a =Automate.fromTree(new RegEx(regEx).parse());
+                System.out.println(a);
+                a=a.determinize();
+                System.out.println(a);
+                a=a.minimizate();
+                System.out.println(a);
+
+                // je suis en train d'écrire la recherche dans le texte, il manque que ça :)
+            }
+            catch(Exception e){}
         }
 
         if (pos == null || pos.size() == 0) {

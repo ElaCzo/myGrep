@@ -1,5 +1,7 @@
+package myGrep;
 
-import java.util.ArrayList;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class Automate {
     int[][] states;
@@ -29,7 +31,22 @@ public class Automate {
         states[0][(int) a] = 1;
     }
 
-    public Automate concat(Automate A1, Automate A2) {
+    private Automate(Automate a, int n) {
+        this.states = new int[n][256];
+        this.debut = new boolean[n];
+        this.fin = new boolean[n];
+        this.epsilon = new ArrayList[n];
+        for (int i = 0; i < n; i++) {
+            epsilon[i] = a.epsilon[i];
+            fin[i] = a.fin[i];
+            debut[i] = a.debut[i];
+            for (int j = 0; j < 256; j++) {
+                this.states[i][j] = a.states[i][j];
+            }
+        }
+    }
+
+    public static Automate concat(Automate A1, Automate A2) {
         Automate sortie = new Automate(A1.nbStates() + A2.nbStates());
 
         for (int i = 0; i < A1.nbStates(); i++) {
@@ -58,13 +75,14 @@ public class Automate {
                 }
             }
             sortie.fin[i + A1.nbStates()] = A2.fin[i];
-            sortie.epsilon[i + A1.nbStates()].addAll(A2.epsilon[i]);
+            for(int s : A2.epsilon[i])
+                sortie.epsilon[i + A1.nbStates()].add(s+A1.nbStates());
         }
 
         return sortie;
     }
 
-    public Automate union(Automate A1, Automate A2) {
+    public static Automate union(Automate A1, Automate A2) {
         Automate sortie = new Automate(A1.nbStates() + A2.nbStates() + 2);
 
         for (int i = 0; i < A1.nbStates(); i++) {
@@ -78,11 +96,11 @@ public class Automate {
         for (int i = 0; i < A2.nbStates(); i++) {
             for (int j = 0; j < 256; j++) {
                 if (A2.states[i][j] != -1) {
-
                     sortie.states[i + A1.nbStates()][j] = A2.states[i][j] + A1.nbStates();
                 }
             }
-            sortie.epsilon[i + A1.nbStates()].addAll(A2.epsilon[i]);
+            for(int s : A2.epsilon[i])
+                sortie.epsilon[i + A1.nbStates()].add(s+A1.nbStates());
         }
 
         sortie.debut[sortie.nbStates() - 2] = true;
@@ -102,11 +120,11 @@ public class Automate {
 
         for (int i = 0; i < A2.nbStates(); i++) {
 
-            if (A1.debut[i] == true) {
+            if (A2.debut[i] == true) {
                 sortie.epsilon[sortie.nbStates() - 2].add(i + A1.nbStates());
             }
 
-            if (A1.fin[i] == true) {
+            if (A2.fin[i] == true) {
                 sortie.epsilon[i + A1.nbStates()].add(sortie.nbStates() - 1);
             }
         }
@@ -114,7 +132,7 @@ public class Automate {
         return sortie;
     }
 
-    public Automate closure(Automate a) {
+    public static Automate closure(Automate a) {
         Automate sortie = new Automate(a.nbStates() + 2);
 
         for (int i = 0; i < a.nbStates(); i++) {
@@ -138,7 +156,7 @@ public class Automate {
                 sortie.epsilon[i].add(sortie.nbStates() - 1);
                 for (int j = 0; j < a.nbStates(); j++) {
                     if (a.debut[j] == true) {
-                        sortie.epsilon[j].add(i);
+                        sortie.epsilon[i].add(j);
                     }
                 }
             }
@@ -148,7 +166,7 @@ public class Automate {
         return sortie;
     }
 
-    public Automate fromTree(RegExTree t) {
+    public static Automate fromTree(RegExTree t) {
 
         if (t.root == RegEx.CONCAT)
             return concat(fromTree(t.subTrees.get(0)), fromTree(t.subTrees.get(1)));
@@ -161,23 +179,234 @@ public class Automate {
         else {
             return new Automate((char) t.root);
         }
-
     }
 
-    public static Automate determinate(Automate a) {
-        ArrayList<ArrayList<Integer>> etats = new ArrayList<>();
+    private class SetOfStates extends HashSet<Integer>{}
 
-        Automate sortie = new Automate(1);
+    private SetOfStates statesReachingEpsilon(int state) {
+        SetOfStates result = new SetOfStates();
 
-        for (int i = 0; i < a.nbStates(); i++) {
-            if (a.debut[i] == true) {
-                // etats
+        boolean marked[] = new boolean[nbStates()];
+        for(int i=0; i<nbStates(); i++){
+            marked[i]=false;
+        }
+
+        marked[state]=true;
+
+        for(int e : epsilon[state]) {
+            SetOfStates r = statesReachingEpsilon(e, marked);
+            result.addAll(r);
+        }
+
+        return result;
+    }
+
+    private SetOfStates statesReachingEpsilon(int state, boolean marked[]){
+        SetOfStates result = new SetOfStates();
+
+        if(marked[state])
+            return new SetOfStates();
+
+        result.add(state);
+        marked[state]=true;
+
+        for(int e : epsilon[state]) {
+            SetOfStates r = statesReachingEpsilon(e, marked);
+            result.addAll(r);
+        }
+
+        return result;
+    }
+
+    private SetOfStates statesReachingLetter(int state, int letter){
+        SetOfStates result = new SetOfStates();
+
+        if(states[state][letter]!=-1) {
+            result.add(states[state][letter]);
+            result.addAll(statesReachingEpsilon(states[state][letter]));
+        }
+
+        return result;
+    }
+
+    /* Il s'agit d'une déterminisation dans un cas précis : un état pour avoir plusieurs epsilon transitions
+    et celles-ci peuvent mener à une transition possédant la même lettre. */
+    public Automate determinize() {
+        Automate result = new Automate(nbStates());
+        int nbStatesResult = 0;
+
+        ArrayList<SetOfStates> statesNDAToDA = new ArrayList<>();
+
+        ArrayList<SetOfStates> stack = new ArrayList<>();
+        // On cherche le début
+        for (int i = 0; i < nbStates(); i++) {
+            SetOfStates statesNDA;
+            if(debut[i]) {
+                statesNDA = statesReachingEpsilon(i);
+                stack.add(statesNDA);
+                statesNDAToDA.add(statesNDA);
+                result.debut[statesNDAToDA.indexOf(statesNDA)] = true;
+                break;
             }
         }
 
-        return null;
+        // tant que la pile n'est pas vide
+        SetOfStates set;
+        while(!stack.isEmpty()){
+            set=stack.remove(stack.size()-1);
+            for (int l = 0; l < 256; l++) {
+                SetOfStates resultStatesNDA = new SetOfStates();
+                for(int s : set) {
+                    SetOfStates statesNDA = statesReachingLetter(s, l);
+                    for(int st : statesNDA)
+                        if(!resultStatesNDA.contains(st))
+                            resultStatesNDA.add(st);
+                }
+                if (!resultStatesNDA.isEmpty()) {
+                    if (!statesNDAToDA.contains(resultStatesNDA)) {
+                        statesNDAToDA.add(resultStatesNDA); // on associe un nouvel état
+                        stack.add(resultStatesNDA);
+                    }
+                    result.states[statesNDAToDA.indexOf(set)][l] = statesNDAToDA.indexOf(resultStatesNDA);
+                }
+            }
 
+            // On vérifie si c'est un état initial ou final
+            for (Integer st : set) {
+                if (debut[st])
+                    result.debut[statesNDAToDA.indexOf(set)] = true;
+                if (fin[st])
+                    result.fin[statesNDAToDA.indexOf(set)] = true;
+            }
+        }
+
+        Automate resultRightNumberOfStates = new Automate(result, statesNDAToDA.size());
+        return resultRightNumberOfStates;
     }
+
+    private class Couple {
+        SetOfStates set;
+        int letter;
+
+        public Couple(SetOfStates set, int letter) {
+            this.set = set;
+            this.letter = letter;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Couple))
+                return false;
+            return ((Couple) obj).set.equals(set) && ((Couple) obj).letter == letter;
+        }
+
+        @Override
+        public int hashCode(){
+            return set.hashCode()+letter;
+        }
+    }
+
+    public Automate minimizate() {
+        ArrayList<SetOfStates> partition = new ArrayList<>();
+
+        // on crée et remplit 2 partitions
+        partition.add(new SetOfStates());
+        partition.add(new SetOfStates());
+        for (int i = 0; i < nbStates(); i++)
+            if (fin[i])
+                partition.get(0).add(i);
+            else
+                partition.get(1).add(i);
+
+        ArrayList<Couple> W = new ArrayList<>();
+
+        // On veut l'ensemble le plus petit
+        SetOfStates smallerSet;
+        if (partition.get(0).size() < partition.get(1).size())
+            smallerSet = partition.get(0);
+        else
+            smallerSet = partition.get(1);
+
+        // On remplit W
+        for (int l = 0; l < 256; l++)
+            W.add(new Couple(smallerSet, l));
+
+        SetOfStates x1, x2;
+        while (!W.isEmpty()) {
+            Couple Za = W.remove(W.size() - 1);;
+
+            for (SetOfStates x : partition) {
+
+                x1 = new SetOfStates();
+                x2 = new SetOfStates();
+                for (int s : x) {
+                    if (Za.set.contains(states[s][Za.letter]))
+                        x1.add(s);
+                    else
+                        x2.add(s);
+                }
+
+                // si X est bien coupé par Za :
+                // On met à jour la partition
+                if (!x1.isEmpty() && !x2.isEmpty()) {
+                    partition.remove(x);
+                    partition.add(x1);
+                    partition.add(x2);
+
+                    // On met à jour W :
+                    Couple c;
+                    smallerSet = partition.get(0);
+                    for (SetOfStates set : partition)
+                        if (set.size() < smallerSet.size())
+                            smallerSet = set;
+
+                    for (int m = 0; m < 256; m++) {
+                        c = new Couple(x, m);
+
+                        if (W.contains(c)) {
+                            W.remove(c);
+                            W.add(new Couple(x1, m));
+                            W.add(new Couple(x2, m));
+                        } else {
+                            W.add(new Couple(smallerSet, m));
+                        }
+                    }
+                }
+            }
+        }
+
+        Automate result = new Automate(partition.size());
+        System.out.println(partition);
+        System.out.flush();
+
+        int resultState=-1;
+        for (SetOfStates set : partition){
+            resultState = partition.indexOf(set);
+            for(int state : set){
+                if(debut[state])
+                    result.debut[resultState]=true;
+
+                for(int l=0; l<256; l++){
+                    int stateOut = states[state][l];
+                    if (stateOut != -1) {
+                        for(SetOfStates s : partition)
+                            if(s.contains(stateOut)) {
+                                result.states[resultState][l] = partition.indexOf(s);
+                                break;
+                            }
+                    }
+                }
+
+                if(fin[state])
+                    result.fin[resultState]=true;
+            }
+        }
+
+        System.out.println(result);
+        System.out.flush();
+
+        return result;
+}
 
     public int nbStates() {
         return epsilon.length;
@@ -193,7 +422,7 @@ public class Automate {
                     s += " [ " + (char) j + " : " + this.states[i][j] + " ] ";
                 }
             }
-            s += "| epsilons :" + epsilon[i].toString();
+            s += "| epsilons :" + epsilon[i].toString()+" ";
             if (this.debut[i] == true) {
                 s += "| deb";
             }
@@ -207,5 +436,4 @@ public class Automate {
 
         return s;
     }
-
 }
