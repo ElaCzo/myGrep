@@ -34,7 +34,7 @@
   <target name="dist" depends="init,clean"
         description="Generer la distribution" >
     <!-- tout mettre dans l'archive -->
-    <jar basedir="." jarfile="../Projet-${nom1}-${nom1}-${DSTAMP}.jar" />
+    <jar basedir="." jarfile="../daar-projet-offline-${nom1}-${nom1}.jar" />
   </target>
 
   <target name="clean"
