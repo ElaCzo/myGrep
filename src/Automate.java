@@ -369,10 +369,10 @@ public class Automate {
                     partition.add(x2);
 
                     // On met à jour W :
-                    smallerSet = partition.get(0);
-                    for (SetOfStates set : partition)
-                        if (set.size() < smallerSet.size())
-                            smallerSet = set;
+                    if (x1.size() < x2.size())
+                        smallerSet = x1;
+                    else
+                        smallerSet = x2;
 
                     for(int m : lettres){
                         if(m>=0 && m<256){
@@ -497,9 +497,7 @@ public class Automate {
 
     public static ArrayList<TextPosition> getOccurencesOnText(ArrayList<String> text, String regEx){
         try{
-            Automate a = Automate.fromTree(new RegEx(regEx).parse()).determinize();
-            System.out.println(a);
-            System.out.flush();
+            Automate a = Automate.fromTree(new RegEx(regEx).parse()).determinize().minimize(regEx);
 
             List<ArrayList<TextPosition>> tmp = text.parallelStream().map(e -> {
                 ArrayList<TextPosition> result = new ArrayList<>();
@@ -512,14 +510,6 @@ public class Automate {
             List<TextPosition> result;
 
             result = tmp.parallelStream().flatMap(Collection::parallelStream).collect(Collectors.toList());
-
-            /*List<TextPosition> result = new ArrayList<TextPosition>();
-
-            for(String ligne : text){
-                for(Integer colonne : getOccurencesOnLine(a, ligne)) {
-                    result.add(new TextPosition(text.indexOf(ligne), colonne));
-                }
-            }*/
 
             return (ArrayList<TextPosition>)result;
 
