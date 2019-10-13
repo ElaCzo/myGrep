@@ -1,7 +1,10 @@
 package myGrep;
 
+import org.w3c.dom.Text;
+
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Automate {
     int[][] states;
@@ -233,7 +236,6 @@ public class Automate {
     et celles-ci peuvent mener à une transition possédant la même lettre. */
     public Automate determinize() {
         Automate result = new Automate(nbStates());
-        int nbStatesResult = 0;
 
         ArrayList<SetOfStates> statesNDAToDA = new ArrayList<>();
 
@@ -305,9 +307,19 @@ public class Automate {
         public int hashCode(){
             return set.hashCode()+letter;
         }
+
+        @Override
+        public String toString(){
+            return "("+set+", "+(char)letter+"="+letter+")";
+        }
     }
 
-    public Automate minimizate() {
+    /* Algorithme de Hopcroft. */
+    public Automate minimize(String regEx) {
+        // lettres présentes dans le mot.
+        HashSet<Integer> lettres = new HashSet<>();
+        for(char c : regEx.toCharArray()) lettres.add((int)c);
+
         ArrayList<SetOfStates> partition = new ArrayList<>();
 
         // on crée et remplit 2 partitions
@@ -329,14 +341,16 @@ public class Automate {
             smallerSet = partition.get(1);
 
         // On remplit W
-        for (int l = 0; l < 256; l++)
-            W.add(new Couple(smallerSet, l));
+        for (int l : lettres)
+            if(l>=0 && l<256)
+                W.add(new Couple(smallerSet, l));
 
         SetOfStates x1, x2;
         while (!W.isEmpty()) {
             Couple Za = W.remove(W.size() - 1);;
 
-            for (SetOfStates x : partition) {
+            for (int p = 0; p<partition.size(); p++) {
+                SetOfStates x = partition.get(p);
 
                 x1 = new SetOfStates();
                 x2 = new SetOfStates();
@@ -350,26 +364,28 @@ public class Automate {
                 // si X est bien coupé par Za :
                 // On met à jour la partition
                 if (!x1.isEmpty() && !x2.isEmpty()) {
+
                     partition.remove(x);
                     partition.add(x1);
                     partition.add(x2);
 
                     // On met à jour W :
-                    Couple c;
                     smallerSet = partition.get(0);
                     for (SetOfStates set : partition)
                         if (set.size() < smallerSet.size())
                             smallerSet = set;
 
-                    for (int m = 0; m < 256; m++) {
-                        c = new Couple(x, m);
+                    for(int m : lettres){
+                        if(m>=0 && m<256){
+                            Couple c = new Couple(x, m);
 
-                        if (W.contains(c)) {
-                            W.remove(c);
-                            W.add(new Couple(x1, m));
-                            W.add(new Couple(x2, m));
-                        } else {
-                            W.add(new Couple(smallerSet, m));
+                            if (W.contains(c)) {
+                                W.remove(c);
+                                W.add(new Couple(x1, m));
+                                W.add(new Couple(x2, m));
+                            } else {
+                                W.add(new Couple(smallerSet, m));
+                            }
                         }
                     }
                 }
@@ -377,8 +393,6 @@ public class Automate {
         }
 
         Automate result = new Automate(partition.size());
-        System.out.println(partition);
-        System.out.flush();
 
         int resultState=-1;
         for (SetOfStates set : partition){
@@ -403,11 +417,8 @@ public class Automate {
             }
         }
 
-        System.out.println(result);
-        System.out.flush();
-
         return result;
-}
+    }
 
     public int nbStates() {
         return epsilon.length;
@@ -436,5 +447,73 @@ public class Automate {
         }
 
         return s;
+    }
+
+    // Avec un automate déterministe (un seul état initial).
+    public static boolean isWord(Automate a, String word){
+        int next;
+
+        // on cherche l'état initial de l'automate.
+        for(int s=0 ; s<a.nbStates() ; s++)
+            if(a.debut[s]) {
+                next=s;
+                // pour chaque lettre du mot
+                for(int i=0 ; i< word.length() ; i++) {
+                    if(a.fin[next])
+                        return true;
+                    char l = word.charAt(i);
+                    // si la lettre est présente sur une transition, on continue.
+                    if (a.states[next][l] != -1)
+                        next = a.states[next][l];
+                    // sinon ce n'est pas le début du mot cherché.
+                    else
+                        return false;
+                }
+                // si on finit le mot et qu'on est dans un état final, on a trouvé le mot cherché.
+                if(a.fin[next])
+                    return true;
+            }
+
+        return false;
+    }
+
+    public static ArrayList<Integer> getOccurencesOnLine(Automate a, String line){
+        ArrayList<Integer> result = new ArrayList<>();
+        for(int i=0; i<line.length(); i++) {
+            if(Automate.isWord(a, line.substring(i)))
+                result.add(i);
+        }
+
+        return result;
+    }
+
+    public static ArrayList<TextPosition> getOccurencesOnText(ArrayList<String> text, String regEx){
+        Automate a=new Automate(0);
+        try {
+            a = Automate.fromTree(new RegEx(regEx).parse())/*.determinize()*/;
+            System.out.println(a);
+        }catch(Exception e){
+            System.out.println("Problème");
+            System.out.flush();
+        }
+
+            a=a.determinize();
+            System.out.println(a);
+            a=a.minimize(regEx);
+            System.out.println("\nMinimisation\n"+a);
+            System.out.flush();
+
+           /* text.parallelStream().map(e -> {
+                ArrayList<TextPosition> result = new ArrayList();
+                for(Integer colonne : getOccurencesOnLine(a, e)) {
+                    result.add(new TextPosition(text.indexOf(e), colonne));
+                }
+                return result;
+            }).collect(Collectors.toList());*/
+        /*}
+        catch(Exception e){
+            return null;
+        }*/
+        return null;
     }
 }

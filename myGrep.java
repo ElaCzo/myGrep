@@ -74,14 +74,10 @@ public class myGrep {
             System.out.println("Methode Regex");
 
             try {
-                Automate a =Automate.fromTree(new RegEx(regEx).parse());
-                System.out.println(a);
-                a=a.determinize();
-                System.out.println(a);
-                a=a.minimizate();
-                System.out.println(a);
-
-                // je suis en train d'écrire la recherche dans le texte, il manque que ça :)
+                now = Instant.now();
+                pos = Automate.getOccurencesOnText(text,regEx);
+                System.out.println(
+                        "Recherche avec les automates a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms\n");
             }
             catch(Exception e){}
         }
