@@ -1,5 +1,7 @@
 package myGrep;
 
+import org.w3c.dom.Text;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -447,24 +449,31 @@ public class Automate {
     }
 
     // Avec un automate déterministe (un seul état initial).
-    public static boolean isWord(Automate a, String word){
+    public static boolean isWord(Automate a, String substring){
         int next;
 
         // on cherche l'état initial de l'automate.
         for(int s=0 ; s<a.nbStates() ; s++)
             if(a.debut[s]) {
                 next=s;
+
                 // pour chaque lettre du mot
-                for(int i=0 ; i< word.length() ; i++) {
+                for(int i=0 ; i < substring.length() ; i++) {
                     if(a.fin[next])
                         return true;
-                    char l = word.charAt(i);
-                    // si la lettre est présente sur une transition, on continue.
-                    if (a.states[next][l] != -1)
-                        next = a.states[next][l];
-                        // sinon ce n'est pas le début du mot cherché.
-                    else
+
+                    int l = substring.charAt(i);
+                    if(l<0 || l>=256)
                         return false;
+
+                    // si la lettre est présente sur une transition, on continue.
+                    if (a.states[next][l] != -1) {
+                        next = a.states[next][l];
+                    }
+                    // sinon ce n'est pas le début du mot cherché.
+                    else {
+                        return false;
+                    }
                 }
                 // si on finit le mot et qu'on est dans un état final, on a trouvé le mot cherché.
                 if(a.fin[next])
@@ -475,10 +484,12 @@ public class Automate {
     }
 
     public static ArrayList<Integer> getOccurencesOnLine(Automate a, String line){
-        ArrayList<Integer> result = new ArrayList<>();
+        ArrayList<Integer> result = new ArrayList<>();;
+
         for(int i=0; i<line.length(); i++) {
-            if(Automate.isWord(a, line.substring(i)))
+            if(Automate.isWord(a, line.substring(i))) {
                 result.add(i);
+            }
         }
 
         return result;
@@ -490,20 +501,30 @@ public class Automate {
             System.out.println(a);
             System.out.flush();
 
-            List<ArrayList<TextPosition>> tmp = text.parallelStream().map(e -> {
+            /*List<ArrayList<TextPosition>> tmp = text.parallelStream().map(e -> {
                 ArrayList<TextPosition> result = new ArrayList<>();
                 for(Integer colonne : getOccurencesOnLine(a, e)) {
                     result.add(new TextPosition(text.indexOf(e), colonne));
                 }
                 return result;
-            }).collect(Collectors.toList());
+            }).collect(Collectors.toList());*
 
-            ArrayList<TextPosition> result = new ArrayList<TextPosition>();
+            List<TextPosition> result;
 
-            for(ArrayList<TextPosition> l : tmp)
-                result.addAll(l);
+            result = tmp.parallelStream().flatMap(Collection::parallelStream).collect(Collectors.toList());
 
-            return result;
+
+             */
+
+            List<TextPosition> result = new ArrayList<TextPosition>();
+
+            for(String ligne : text){
+                for(Integer colonne : getOccurencesOnLine(a, ligne)) {
+                    result.add(new TextPosition(text.indexOf(ligne), colonne));
+                }
+            }
+
+            return (ArrayList<TextPosition>)result;
 
         }catch(Exception e){}
         return null;
