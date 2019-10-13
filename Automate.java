@@ -501,28 +501,25 @@ public class Automate {
             System.out.println(a);
             System.out.flush();
 
-            /*List<ArrayList<TextPosition>> tmp = text.parallelStream().map(e -> {
+            List<ArrayList<TextPosition>> tmp = text.parallelStream().map(e -> {
                 ArrayList<TextPosition> result = new ArrayList<>();
                 for(Integer colonne : getOccurencesOnLine(a, e)) {
                     result.add(new TextPosition(text.indexOf(e), colonne));
                 }
                 return result;
-            }).collect(Collectors.toList());*
+            }).collect(Collectors.toList());
 
             List<TextPosition> result;
 
             result = tmp.parallelStream().flatMap(Collection::parallelStream).collect(Collectors.toList());
 
-
-             */
-
-            List<TextPosition> result = new ArrayList<TextPosition>();
+            /*List<TextPosition> result = new ArrayList<TextPosition>();
 
             for(String ligne : text){
                 for(Integer colonne : getOccurencesOnLine(a, ligne)) {
                     result.add(new TextPosition(text.indexOf(ligne), colonne));
                 }
-            }
+            }*/
 
             return (ArrayList<TextPosition>)result;
 
