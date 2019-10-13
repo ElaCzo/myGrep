@@ -1,8 +1,5 @@
 package myGrep;
 
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -465,7 +462,7 @@ public class Automate {
                     // si la lettre est présente sur une transition, on continue.
                     if (a.states[next][l] != -1)
                         next = a.states[next][l];
-                    // sinon ce n'est pas le début du mot cherché.
+                        // sinon ce n'est pas le début du mot cherché.
                     else
                         return false;
                 }
@@ -488,32 +485,27 @@ public class Automate {
     }
 
     public static ArrayList<TextPosition> getOccurencesOnText(ArrayList<String> text, String regEx){
-        Automate a=new Automate(0);
-        try {
-            a = Automate.fromTree(new RegEx(regEx).parse())/*.determinize()*/;
+        try{
+            Automate a = Automate.fromTree(new RegEx(regEx).parse()).determinize();
             System.out.println(a);
-        }catch(Exception e){
-            System.out.println("Problème");
-            System.out.flush();
-        }
-
-            a=a.determinize();
-            System.out.println(a);
-            a=a.minimize(regEx);
-            System.out.println("\nMinimisation\n"+a);
             System.out.flush();
 
-           /* text.parallelStream().map(e -> {
-                ArrayList<TextPosition> result = new ArrayList();
+            List<ArrayList<TextPosition>> tmp = text.parallelStream().map(e -> {
+                ArrayList<TextPosition> result = new ArrayList<>();
                 for(Integer colonne : getOccurencesOnLine(a, e)) {
                     result.add(new TextPosition(text.indexOf(e), colonne));
                 }
                 return result;
-            }).collect(Collectors.toList());*/
-        /*}
-        catch(Exception e){
-            return null;
-        }*/
+            }).collect(Collectors.toList());
+
+            ArrayList<TextPosition> result = new ArrayList<TextPosition>();
+
+            for(ArrayList<TextPosition> l : tmp)
+                result.addAll(l);
+
+            return result;
+
+        }catch(Exception e){}
         return null;
     }
 }
