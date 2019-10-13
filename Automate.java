@@ -370,10 +370,10 @@ public class Automate {
                     partition.add(x2);
 
                     // On met à jour W :
-                    smallerSet = partition.get(0);
-                    for (SetOfStates set : partition)
-                        if (set.size() < smallerSet.size())
-                            smallerSet = set;
+                    if (x1.size() < x2.size())
+                        smallerSet = x1;
+                    else
+                        smallerSet = x2;
 
                     for(int m : lettres){
                         if(m>=0 && m<256){
@@ -450,24 +450,31 @@ public class Automate {
     }
 
     // Avec un automate déterministe (un seul état initial).
-    public static boolean isWord(Automate a, String word){
+    public static boolean isWord(Automate a, String substring){
         int next;
 
         // on cherche l'état initial de l'automate.
         for(int s=0 ; s<a.nbStates() ; s++)
             if(a.debut[s]) {
                 next=s;
+
                 // pour chaque lettre du mot
-                for(int i=0 ; i< word.length() ; i++) {
+                for(int i=0 ; i < substring.length() ; i++) {
                     if(a.fin[next])
                         return true;
-                    char l = word.charAt(i);
-                    // si la lettre est présente sur une transition, on continue.
-                    if (a.states[next][l] != -1)
-                        next = a.states[next][l];
-                    // sinon ce n'est pas le début du mot cherché.
-                    else
+
+                    int l = substring.charAt(i);
+                    if(l<0 || l>=256)
                         return false;
+
+                    // si la lettre est présente sur une transition, on continue.
+                    if (a.states[next][l] != -1) {
+                        next = a.states[next][l];
+                    }
+                    // sinon ce n'est pas le début du mot cherché.
+                    else {
+                        return false;
+                    }
                 }
                 // si on finit le mot et qu'on est dans un état final, on a trouvé le mot cherché.
                 if(a.fin[next])
@@ -478,42 +485,36 @@ public class Automate {
     }
 
     public static ArrayList<Integer> getOccurencesOnLine(Automate a, String line){
-        ArrayList<Integer> result = new ArrayList<>();
+        ArrayList<Integer> result = new ArrayList<>();;
+
         for(int i=0; i<line.length(); i++) {
-            if(Automate.isWord(a, line.substring(i)))
+            if(Automate.isWord(a, line.substring(i))) {
                 result.add(i);
+            }
         }
 
         return result;
     }
 
     public static ArrayList<TextPosition> getOccurencesOnText(ArrayList<String> text, String regEx){
-        Automate a=new Automate(0);
-        try {
-            a = Automate.fromTree(new RegEx(regEx).parse())/*.determinize()*/;
-            System.out.println(a);
-        }catch(Exception e){
-            System.out.println("Problème");
-            System.out.flush();
-        }
+        try{
+            Automate a = Automate.fromTree(new RegEx(regEx).parse()).determinize().minimize(regEx);
 
-            a=a.determinize();
-            System.out.println(a);
-            a=a.minimize(regEx);
-            System.out.println("\nMinimisation\n"+a);
-            System.out.flush();
-
-           /* text.parallelStream().map(e -> {
-                ArrayList<TextPosition> result = new ArrayList();
+            List<ArrayList<TextPosition>> tmp = text.parallelStream().map(e -> {
+                ArrayList<TextPosition> result = new ArrayList<>();
                 for(Integer colonne : getOccurencesOnLine(a, e)) {
                     result.add(new TextPosition(text.indexOf(e), colonne));
                 }
                 return result;
-            }).collect(Collectors.toList());*/
-        /*}
-        catch(Exception e){
-            return null;
-        }*/
+            }).collect(Collectors.toList());
+
+            List<TextPosition> result;
+
+            result = tmp.parallelStream().flatMap(Collection::parallelStream).collect(Collectors.toList());
+
+            return (ArrayList<TextPosition>)result;
+
+        }catch(Exception e){}
         return null;
     }
 }
