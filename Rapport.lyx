@@ -1,0 +1,687 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style french
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Rapport Projet offline
+\end_layout
+
+\begin_layout Author
+Ivan Delgado
+\begin_inset Newline newline
+\end_inset
+
+Elisabeth Abbas Zadeb
+\end_layout
+
+\begin_layout Part
+Introduction
+\end_layout
+
+\begin_layout Standard
+Ce document est le Rapport du projet 
+\emph on
+offline
+\emph default
+ dans le cadre de l'UE DARR.
+\end_layout
+
+\begin_layout Standard
+Le but de ce projet est de réaliser la partie 
+\emph on
+offline
+\emph default
+ d'un moteur de recherche; a savoir la recherche d'un motif sous le format
+ RegEx dans un texte issu du Projet Guttemberg.
+\end_layout
+
+\begin_layout Standard
+Pour cela nous allons faire une copie de la commande 
+\emph on
+egrep 
+\emph default
+en nous restreignant pour les éléments de RegEx aux parenthèses, l’alternative,
+ la concaténation, l’opération étoile, le point , et les lettre ASCII.
+\end_layout
+
+\begin_layout Part
+Mode d'emplois
+\end_layout
+
+\begin_layout Standard
+Le code du projet a été réalisé en Java, il est fourni avec un fichier 
+\emph on
+build.xml
+\emph default
+ pour 
+\emph on
+apache ant
+\emph default
+ qui permet les commandes suivantes :
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+ant compile
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+pour compiler le projet
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\emph on
+ant run -Darg0="<motif a rechercher>" -Darg1=
+\begin_inset Quotes erd
+\end_inset
+
+<fichier texte>
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+pour lancer la recherche du motif sur un texte
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\emph on
+ant clean
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+pour nettoyer le répertoire du projet
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part
+Stratégies implémentés
+\end_layout
+
+\begin_layout Standard
+Dans un premier temps nous considérons que le texte est une matrice, c'est
+ un tableau de lignes qui chacune contient un tableau de caractères, pour
+ déterminer la position d'un match il suffi donc d'un numéro de ligne et
+ d'une position dans la ligne, cette information est dans la classe 
+\emph on
+TextPosition.java
+\emph default
+.
+\end_layout
+
+\begin_layout Section
+Recherche par Automates
+\end_layout
+
+\begin_layout Standard
+Le traitement d'un regex passe par différentes opérations :
+\end_layout
+
+\begin_layout Enumerate
+Dans un premier temps nous allons parser le regex pour en construire un
+ arbre de syntaxe.
+\end_layout
+
+\begin_layout Enumerate
+Construire a partir de l'arbre construire un automate fini non-déterministe
+ avec-transitions selon la méthode Aho-Ullman
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+http://infolab.stanford.edu/~ullman/focs/ch10.pdf
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+Déterminiser l'automate en enlevant les 
+\emph on
+epsilon 
+\emph default
+transitions avec la méthode des sous-ensembles.
+\end_layout
+
+\begin_layout Enumerate
+Minimiser l'automate en construisant un automate équivalent avec un nombre
+ minimum d’ états.
+\end_layout
+
+\begin_layout Enumerate
+Enfin l’automate est utilisé pour tester si un suffixe d’une ligne du fichier
+ textuel donné initialement est reconnaissable par cet automate.
+\end_layout
+
+\begin_layout Standard
+La structure de données représentant un automate est semblable a celle de
+ la liste d'adjacence d'un graphe, il y a une ligne par état, chacune contenant
+ un tableau de 256 entiers, un par caractère ASCII, la valeur de la case
+ est l'état résultant de la transition par ce caractère, la valeur est 
+\emph on
+null
+\emph default
+ s'il n'y a pas de transition.
+\end_layout
+
+\begin_layout Standard
+On ajoute a cela trois tableau, un pour savoir les états de départ, un pour
+ les états acceptés et un pour les 
+\emph on
+epsilon
+\emph default
+ transitions.
+\end_layout
+
+\begin_layout Standard
+Le code de la structure de donnée, ainsi que des algorithmes de détermination
+ et de minimisations se trouvent dans le fichier Automate.java.
+\end_layout
+
+\begin_layout Section
+Algorithme de Knuth-Morris-Prat
+\end_layout
+
+\begin_layout Standard
+Si le RegEx recherché n'est composé que de concaténations, il est alors
+ superflu de d'en construire un automate, une représentation en chaîne de
+ caractères suffit.
+\end_layout
+
+\begin_layout Standard
+Nous pouvons alors utiliser l'Algorithme de Knuth-Morris-Pratt (KMP) qui
+ est un algorithme de recherche de sous-chaîne, permettant de trouver les
+ occurrences d'une chaîne P dans un texte S avec une complexité linéaire
+ 
+\emph on
+O(|P|+|S|).
+ 
+\emph default
+KMP se base sur un prétraitement de P qui donne un tableau d'indices appelé
+ retenue qui donne la position de la chaîne ou reprendre les comparaisons
+ en cas de non-concordance, permettant de ne pas avoir a ré-examiner les
+ répétitions de caractères et de préfixes, limitant ainsi les comparaison
+ nécessaires.
+\end_layout
+
+\begin_layout Standard
+KMP est un algorithme simple ne nécessitant pas de structure de données
+ particulière, son code se trouve dans le fichier 
+\emph on
+KMP.java
+\emph default
+ .
+\end_layout
+
+\begin_layout Section
+Index et Radix Tree
+\end_layout
+
+\begin_layout Standard
+Un texte peut être décomposé en une liste de mots ( une suite de caractères
+ uniquement alphabétiques ), avec 
+\emph on
+awk
+\emph default
+ nous pouvons facilement créer une liste des mots uniques d'un texte dans
+ un fichier 
+\emph on
+.txt 
+\emph default
+dans le répertoire 
+\emph on
+index, 
+\emph default
+puis en utilisant l'algorithme KMP sur chacun de ces mots nous pouvons trouver
+ la position de l'ensemble des occurrences, qui triées par ordre décroissant
+ d’occurrences, serons mises dans un fichier 
+\emph on
+.index ; cette suite d'opérations est coûteuse mais elle n'est a faire qu'une
+ fois par fichiers.
+\end_layout
+
+\begin_layout Standard
+Ensuite avec cet index nous pouvons en construire un 
+\emph on
+radix tree
+\emph default
+ ce qui permet de dire rapidement si le mot recherché est dans le texte.
+\end_layout
+
+\begin_layout Standard
+L'arbre contient pour chaque nœud, une liste positions si le nœud correspond
+ a un mot de l'index, et une liste des fils pour la lettre suivante correspondan
+te.
+ Si il n'y a plus de lettre les positions retournées serons celle du noeud
+ et de ses fils récursivement.
+\end_layout
+
+\begin_layout Standard
+L'indexation se fait dans 
+\emph on
+Indexing.java
+\emph default
+ et le 
+\emph on
+radix tree
+\emph default
+ est défini dans 
+\emph on
+IndexTree.java
+\emph default
+.
+\end_layout
+
+\begin_layout Section*
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+La stratégie que nous allons appliquer est la suivante :
+\end_layout
+
+\begin_layout Standard
+Si le motif est un mot, nous allons le chercher avec la méthode de l'index,
+ si il n'y a pas de résultats ou si le motif n'as que des concaténations
+ on utilise KMP.
+\end_layout
+
+\begin_layout Standard
+Si c'est un regex nous utilisons la méthode de l'automate.
+\end_layout
+
+\begin_layout Part
+Test et Analyse
+\end_layout
+
+\begin_layout Subsubsection*
+A History of Babylon (124 304 mots): 
+\end_layout
+
+\begin_layout Itemize
+Recherche de 
+\begin_inset Quotes fld
+\end_inset
+
+Sargon
+\begin_inset Quotes frd
+\end_inset
+
+ : 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+temps par egrep 15 ms
+\end_layout
+
+\begin_layout Standard
+temps par index :
+\end_layout
+
+\begin_layout Itemize
+construction de l'index : 37 s
+\end_layout
+
+\begin_layout Itemize
+chargement de l'arbre 300 ms 
+\end_layout
+
+\begin_layout Itemize
+recherche dans l'arbre : <1µs
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Recherche de 
+\begin_inset Quotes fld
+\end_inset
+
+S(a|g|r)*on
+\begin_inset Quotes frd
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+temps par egrep : 18 ms
+\end_layout
+
+\begin_layout Standard
+temps par l'automate : 161 ms
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Recherche de 
+\begin_inset Quotes fld
+\end_inset
+
+argon
+\begin_inset Quotes frd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+temps egrep : 23 ms
+\end_layout
+
+\begin_layout Standard
+temps KMP : 40 ms
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection*
+Dracula (164 424 mots): 
+\end_layout
+
+\begin_layout Itemize
+Recherche de 
+\begin_inset Quotes fld
+\end_inset
+
+Dracula
+\begin_inset Quotes frd
+\end_inset
+
+ : 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+temps par egrep 21 ms
+\end_layout
+
+\begin_layout Standard
+temps par index :
+\end_layout
+
+\begin_layout Itemize
+construction de l'index : 44 s
+\end_layout
+
+\begin_layout Itemize
+chargement de l'arbre 500 ms 
+\end_layout
+
+\begin_layout Itemize
+recherche dans l'arbre : <1µs
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Recherche de 
+\begin_inset Quotes fld
+\end_inset
+
+D(r|a|c)*ula
+\begin_inset Quotes frd
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+temps par egrep : 10 ms
+\end_layout
+
+\begin_layout Standard
+temps par l'automate : 125 ms
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Recherche de 
+\begin_inset Quotes fld
+\end_inset
+
+racula
+\begin_inset Quotes frd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+temps egrep : 25 ms
+\end_layout
+
+\begin_layout Standard
+temps KMP : 50 ms
+\end_layout
+
+\end_deeper
+\begin_layout Subsubsection*
+Don Quixote (430 267 mots): 
+\end_layout
+
+\begin_layout Itemize
+Recherche de 
+\begin_inset Quotes fld
+\end_inset
+
+Quixote
+\begin_inset Quotes frd
+\end_inset
+
+ : 
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+temps par egrep 10 ms
+\end_layout
+
+\begin_layout Standard
+temps par index :
+\end_layout
+
+\begin_layout Itemize
+construction de l'index : 223 s
+\end_layout
+
+\begin_layout Itemize
+chargement de l'arbre 650 ms 
+\end_layout
+
+\begin_layout Itemize
+recherche dans l'arbre : <1µs
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Recherche de 
+\begin_inset Quotes fld
+\end_inset
+
+Q(u|i|x)*ote
+\begin_inset Quotes frd
+\end_inset
+
+:
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+temps par egrep : 10 ms
+\end_layout
+
+\begin_layout Standard
+temps par l'automate : 600 ms
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Recherche de 
+\begin_inset Quotes fld
+\end_inset
+
+uixote
+\begin_inset Quotes frd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+temps egrep : 10 ms
+\end_layout
+
+\begin_layout Standard
+temps KMP : 150 ms
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Dans un premier temps on peut constater la constance et l'optimisation de
+ egrep fruit d’années de maturation.
+\begin_inset Newline newline
+\end_inset
+
+On peut constater que Kmp est bien plus rapide que l'automate, tiens mieux
+ le passage a l'échelle mais est beaucoup moins versatile.
+\begin_inset Newline newline
+\end_inset
+
+L'index quand a lui est extrêmement coûteux dans le calcul de l'index et
+ dans la construction en mémoire du 
+\emph on
+radix tree
+\emph default
+, mais une fois en place, les recherches dans l'arbre sont proche de l'instantan
+ée et de bien loin plus rapides que les autres méthodes.
+\end_layout
+
+\begin_layout Part
+Conclusions
+\end_layout
+
+\begin_layout Standard
+Dans l'exercice de proposer un clone de la commande egrep, qui est rarement
+ utilisée plusieurs fois sur le même fichier, l'automate et KMP suffisent.
+ L'automate permet de prendre en charge l'ensemble des motifs possibles
+ et KMP viens accélérer la recherche sur les mots naturels, qui sont de
+ loin les plus fréquemment recherchées.
+\end_layout
+
+\begin_layout Standard
+Néanmoins si on regarde la situation d'un point de vue plus global, celui
+ d'un moteur de recherche sur le projet gunttemberg, on seras plus enclin
+ a lancer plusieurs fois des recherches dans un même document, et l'investisseme
+nt payé a construire et charger des index pour ces documents se rentabilise
+ rapidement.
+ Plus les recherches sur un meme document sont fréquentes plus la méthode
+ de l'index est payante.
+\end_layout
+
+\end_body
+\end_document
