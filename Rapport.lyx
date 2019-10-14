@@ -1,10 +1,15 @@
-#LyX 2.3 created this file. For more info see http://www.lyx.org/
-\lyxformat 544
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
 \save_transient_properties true
 \origin unavailable
 \textclass article
+\begin_preamble
+% Added by lyx2lyx
+\renewcommand{\textendash}{--}
+\renewcommand{\textemdash}{---}
+\end_preamble
 \use_default_options true
 \maintain_unincluded_children false
 \language french
@@ -21,8 +26,6 @@
 \font_osf false
 \font_sf_scale 100 100
 \font_tt_scale 100 100
-\use_microtype false
-\use_dash_ligatures true
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -52,7 +55,6 @@
 \suppress_date false
 \justification true
 \use_refstyle 1
-\use_minted 0
 \index Index
 \shortcut idx
 \color #008000
@@ -61,10 +63,7 @@
 \tocdepth 3
 \paragraph_separation indent
 \paragraph_indentation default
-\is_math_indent 0
-\math_numbering_side default
-\quotes_style french
-\dynamic_quotes 0
+\quotes_language french
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
@@ -86,7 +85,7 @@ Ivan Delgado
 \begin_inset Newline newline
 \end_inset
 
-Elisabeth Abbas Zadeb
+Elisabeth Abbas Zadeh
 \end_layout
 
 \begin_layout Part
@@ -106,8 +105,8 @@ Le but de ce projet est de réaliser la partie
 \emph on
 offline
 \emph default
- d'un moteur de recherche; a savoir la recherche d'un motif sous le format
- RegEx dans un texte issu du Projet Guttemberg.
+ d'un moteur de recherche; à savoir la recherche d'un motif sous le format
+ RegEx dans un texte issu du Projet Gutemberg.
 \end_layout
 
 \begin_layout Standard
@@ -115,12 +114,12 @@ Pour cela nous allons faire une copie de la commande
 \emph on
 egrep 
 \emph default
-en nous restreignant pour les éléments de RegEx aux parenthèses, l’alternative,
- la concaténation, l’opération étoile, le point , et les lettre ASCII.
+en nous restreignant pour les éléments de RegEx aux parenthèses, à l’alternative
+, à la concaténation, à l’opération étoile, au point et aux lettres ASCII.
 \end_layout
 
 \begin_layout Part
-Mode d'emplois
+Mode d'emploi
 \end_layout
 
 \begin_layout Standard
@@ -183,14 +182,14 @@ pour nettoyer le répertoire du projet
 \end_layout
 
 \begin_layout Part
-Stratégies implémentés
+Stratégies implémentées
 \end_layout
 
 \begin_layout Standard
 Dans un premier temps nous considérons que le texte est une matrice, c'est
- un tableau de lignes qui chacune contient un tableau de caractères, pour
- déterminer la position d'un match il suffi donc d'un numéro de ligne et
- d'une position dans la ligne, cette information est dans la classe 
+ un tableau de lignes qui contient chacune un tableau de caractères.
+ Pour déterminer la position d'un match, il suffit donc d'un numéro de ligne
+ et d'une position dans la ligne, cette information est dans la classe 
 \emph on
 TextPosition.java
 \emph default
@@ -206,13 +205,40 @@ Le traitement d'un regex passe par différentes opérations :
 \end_layout
 
 \begin_layout Enumerate
-Dans un premier temps nous allons parser le regex pour en construire un
+Dans un premier temps, nous allons parser le regex pour en construire un
  arbre de syntaxe.
+ Cette opération est en 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$O(n)$
+\end_layout
+
+\end_inset
+
+, où 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$n$
+\end_layout
+
+\end_inset
+
+ est le nombre de caractères du regex.
+ 
 \end_layout
 
 \begin_layout Enumerate
-Construire a partir de l'arbre construire un automate fini non-déterministe
- avec-transitions selon la méthode Aho-Ullman
+A partir de l'arbre, construire un automate fini non-déterministe avec 
+\emph on
+epsilon
+\emph default
+-transitions selon la méthode Aho-Ullman
 \begin_inset Foot
 status open
 
@@ -231,20 +257,130 @@ Déterminiser l'automate en enlevant les
 epsilon 
 \emph default
 transitions avec la méthode des sous-ensembles.
+ La complexité est en 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$O(n^2)$
+\end_layout
+
+\end_inset
+
+, avec 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$n$
+\end_layout
+
+\end_inset
+
+ le nombre d'états de l'automate.
+ 
 \end_layout
 
 \begin_layout Enumerate
 Minimiser l'automate en construisant un automate équivalent avec un nombre
- minimum d’ états.
+ minimum d’ états avec l'algorithme de Hopcroft.
+ La cmplexité est en 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$O(|A|.
+ n 
+\backslash
+log n)$
+\end_layout
+
+\end_inset
+
+, avec 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$|A|$
+\end_layout
+
+\end_inset
+
+ la taille de l'alphabet et 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$n$
+\end_layout
+
+\end_inset
+
+ le nombre d'états.
+ 
 \end_layout
 
 \begin_layout Enumerate
-Enfin l’automate est utilisé pour tester si un suffixe d’une ligne du fichier
- textuel donné initialement est reconnaissable par cet automate.
+Enfin l’automate est utilisé pour tester si une sous-chaîne d’une ligne
+ du fichier textuel donné initialement est reconnaissable par cet automate.
+ Des parallelStream sont utilisés sont chaque ligne du fichier dans un souci
+ d'optimisation, ainsi la complexité est inférieure à 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$O(|L|.|C|.
+ n)$
+\end_layout
+
+\end_inset
+
+, où 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$|L|$
+\end_layout
+
+\end_inset
+
+ est le nombre de lignes, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$|C|$
+\end_layout
+
+\end_inset
+
+ le nombre de caractères par ligne et 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$n$
+\end_layout
+
+\end_inset
+
+ le nombre d'états de l'automate.
+ 
 \end_layout
 
 \begin_layout Standard
-La structure de données représentant un automate est semblable a celle de
+La structure de données représentant un automate est semblable à celle de
  la liste d'adjacence d'un graphe, il y a une ligne par état, chacune contenant
  un tableau de 256 entiers, un par caractère ASCII, la valeur de la case
  est l'état résultant de la transition par ce caractère, la valeur est 
@@ -255,8 +391,8 @@ null
 \end_layout
 
 \begin_layout Standard
-On ajoute a cela trois tableau, un pour savoir les états de départ, un pour
- les états acceptés et un pour les 
+On ajoute à cela trois tableaux, un pour les états de départ, un pour les
+ états finaux et un pour les 
 \emph on
 epsilon
 \emph default
@@ -264,7 +400,7 @@ epsilon
 \end_layout
 
 \begin_layout Standard
-Le code de la structure de donnée, ainsi que des algorithmes de détermination
+Le code de la structure de données, ainsi que les algorithmes de détermination
  et de minimisations se trouvent dans le fichier Automate.java.
 \end_layout
 
@@ -274,13 +410,13 @@ Algorithme de Knuth-Morris-Prat
 
 \begin_layout Standard
 Si le RegEx recherché n'est composé que de concaténations, il est alors
- superflu de d'en construire un automate, une représentation en chaîne de
- caractères suffit.
+ superflu d'en construire un automate, une représentation en chaîne de caractère
+s suffit.
 \end_layout
 
 \begin_layout Standard
 Nous pouvons alors utiliser l'Algorithme de Knuth-Morris-Pratt (KMP) qui
- est un algorithme de recherche de sous-chaîne, permettant de trouver les
+ est un algorithme de recherche de sous-chaînes, permettant de trouver les
  occurrences d'une chaîne P dans un texte S avec une complexité linéaire
  
 \emph on
@@ -288,9 +424,9 @@ O(|P|+|S|).
  
 \emph default
 KMP se base sur un prétraitement de P qui donne un tableau d'indices appelé
- retenue qui donne la position de la chaîne ou reprendre les comparaisons
- en cas de non-concordance, permettant de ne pas avoir a ré-examiner les
- répétitions de caractères et de préfixes, limitant ainsi les comparaison
+ retenue qui donne la position de la chaîne où reprendre les comparaisons
+ en cas de non-concordance, permettant de ne pas avoir à ré-examiner les
+ répétitions de caractères et de préfixes et limitant ainsi les comparaison
  nécessaires.
 \end_layout
 
@@ -308,8 +444,8 @@ Index et Radix Tree
 \end_layout
 
 \begin_layout Standard
-Un texte peut être décomposé en une liste de mots ( une suite de caractères
- uniquement alphabétiques ), avec 
+Un texte peut être décomposé en une liste de mots (une suite de caractères
+ uniquement alphabétiques), avec 
 \emph on
 awk
 \emph default
@@ -318,31 +454,32 @@ awk
 \emph on
 .txt 
 \emph default
-dans le répertoire 
+(situé dans le répertoire 
 \emph on
-index, 
+index).
+ 
 \emph default
-puis en utilisant l'algorithme KMP sur chacun de ces mots nous pouvons trouver
- la position de l'ensemble des occurrences, qui triées par ordre décroissant
- d’occurrences, serons mises dans un fichier 
+Puis, en utilisant l'algorithme KMP sur chacun de ces mots, nous pouvons
+ trouver la position de l'ensemble des occurrences, qui, triées par ordre
+ décroissant d’occurrences, seront mises dans un fichier 
 \emph on
-.index ; cette suite d'opérations est coûteuse mais elle n'est a faire qu'une
+.index ; cette suite d'opérations est coûteuse mais elle n'est à faire qu'une
  fois par fichiers.
 \end_layout
 
 \begin_layout Standard
-Ensuite avec cet index nous pouvons en construire un 
+Ensuite avec cet index, nous pouvons en construire un 
 \emph on
-radix tree
+radix tree,
 \emph default
  ce qui permet de dire rapidement si le mot recherché est dans le texte.
 \end_layout
 
 \begin_layout Standard
-L'arbre contient pour chaque nœud, une liste positions si le nœud correspond
- a un mot de l'index, et une liste des fils pour la lettre suivante correspondan
-te.
- Si il n'y a plus de lettre les positions retournées serons celle du noeud
+L'arbre contient, pour chaque nœud, une liste de positions lorsque le nœud
+ correspond à un mot de l'index et une liste des fils pour la lettre suivante
+ correspondante.
+ S'il n'y a plus de lettre, les positions retournées seront celle du noeud
  et de ses fils récursivement.
 \end_layout
 
@@ -375,12 +512,12 @@ La stratégie que nous allons appliquer est la suivante :
 
 \begin_layout Standard
 Si le motif est un mot, nous allons le chercher avec la méthode de l'index,
- si il n'y a pas de résultats ou si le motif n'as que des concaténations
- on utilise KMP.
+ s'il n'y a pas de résultat ou si le motif n'a que des concaténations, on
+ utilise KMP.
 \end_layout
 
 \begin_layout Standard
-Si c'est un regex nous utilisons la méthode de l'automate.
+Si c'est un regex, nous utilisons la méthode de l'automate.
 \end_layout
 
 \begin_layout Part
@@ -642,44 +779,45 @@ temps KMP : 150 ms
 
 \end_deeper
 \begin_layout Standard
-Dans un premier temps on peut constater la constance et l'optimisation de
- egrep fruit d’années de maturation.
+Dans un premier temps, on peut constater la constance et l'optimisation
+ de egrep, fruit d’années de maturation.
 \begin_inset Newline newline
 \end_inset
 
-On peut constater que Kmp est bien plus rapide que l'automate, tiens mieux
- le passage a l'échelle mais est beaucoup moins versatile.
+On observe que KMP est bien plus rapide que l'automate, tient mieux le passage
+ a l'échelle mais est beaucoup moins versatile.
 \begin_inset Newline newline
 \end_inset
 
-L'index quand a lui est extrêmement coûteux dans le calcul de l'index et
- dans la construction en mémoire du 
+L'index, quant à lui, est extrêmement coûteux dans le calcul de l'index
+ et dans la construction en mémoire du 
 \emph on
 radix tree
 \emph default
-, mais une fois en place, les recherches dans l'arbre sont proche de l'instantan
-ée et de bien loin plus rapides que les autres méthodes.
+, mais une fois en place, les recherches dans l'arbre sont proches de l'instanta
+née et de bien loin plus rapides que les autres méthodes.
 \end_layout
 
 \begin_layout Part
-Conclusions
+Conclusion
 \end_layout
 
 \begin_layout Standard
-Dans l'exercice de proposer un clone de la commande egrep, qui est rarement
- utilisée plusieurs fois sur le même fichier, l'automate et KMP suffisent.
+Dans cet exercice d'implentation d'un clone de la commande egrep, qui est
+ rarement utilisée plusieurs fois sur le même fichier, l'automate et KMP
+ suffisent.
  L'automate permet de prendre en charge l'ensemble des motifs possibles
- et KMP viens accélérer la recherche sur les mots naturels, qui sont de
- loin les plus fréquemment recherchées.
+ et KMP vient accélérer la recherche sur les mots naturels, qui sont de
+ loin les plus fréquemment recherchés.
 \end_layout
 
 \begin_layout Standard
-Néanmoins si on regarde la situation d'un point de vue plus global, celui
- d'un moteur de recherche sur le projet gunttemberg, on seras plus enclin
- a lancer plusieurs fois des recherches dans un même document, et l'investisseme
-nt payé a construire et charger des index pour ces documents se rentabilise
+Néanmoins, si on regarde la situation d'un point de vue plus global, celui
+ d'un moteur de recherche sur le projet Guntemberg, on sera plus enclin
+ à lancer plusieurs fois des recherches dans un même document et l'investissemen
+t payé à construire et à charger des index pour ces documents se rentabilise
  rapidement.
- Plus les recherches sur un meme document sont fréquentes plus la méthode
+ Plus les recherches sur un même document sont fréquentes, plus la méthode
  de l'index est payante.
 \end_layout
 
