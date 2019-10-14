@@ -404,6 +404,89 @@ Le code de la structure de données, ainsi que les algorithmes de détermination
  et de minimisations se trouvent dans le fichier Automate.java.
 \end_layout
 
+\begin_layout Subsection*
+Implémentation
+\end_layout
+
+\begin_layout Subsubsection*
+public static ArrayList<TextPosition> getOccurencesOnText(ArrayList<String>
+ text, String regEx)
+\end_layout
+
+\begin_layout Standard
+Cette fonction permet d'obtenir une liste de couple de positions (ligne,
+ colonne).
+ En entrée, elle prend une liste de lignes du texte et une regex.
+ 
+\end_layout
+
+\begin_layout Standard
+L'automate déterministe minimal associé à la regex est calculé.
+ 
+\end_layout
+
+\begin_layout Standard
+Ensuite, on fait un stream pour appliquer à chaque ligne getOccurencesOnLine
+ pour récupérer la liste des colonnes où se trouve le mot.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+public static boolean isWord(Automate a, String substring)
+\end_layout
+
+\begin_layout Standard
+A partir de l'état initial, pour chaque lettre de la sous-chaîne, on cherche
+ à trouver un état final dans l'automate.
+ Dans ce cas on renvoie vrai.
+ S'il n'y pas de chemin possible dans l'automate ou si on a atteint la fin
+ de la sous-chaine, le mot n'a pas été trouvé.
+ Elle est utilisée dans getOccurencesOnLine.
+\end_layout
+
+\begin_layout Subsubsection*
+public Automate minimize(String regEx)
+\end_layout
+
+\begin_layout Standard
+Il s'agit de l'algorihtme de Hopcroft.
+\end_layout
+
+\begin_layout Standard
+La partition est composée de deux ensembles au départ : les états terminaux
+ et les autres.
+ W est un ensemble qui contient les couples des lettres et du plus petits
+ des 2 sous-ensembles.
+\end_layout
+
+\begin_layout Standard
+Tant que W n'est pas vide, on prend un couple dans W, on teste si son ensemble
+ coupe un ensemble de la partition.
+ Si oui, on met à jour la partition en séparant cet ensemble en deux et
+ on met à jour W.
+ 
+\end_layout
+
+\begin_layout Standard
+On recrée enfin un automate en créant un état par classe d'équivalence.
+ 
+\end_layout
+
+\begin_layout Subsubsection*
+public Automate determinize()
+\end_layout
+
+\begin_layout Standard
+L'état de départ est formé des états de départ et des états pour lesquels
+ il existe un chemin depuis un état de départ composé uniquement d'epsilon-trans
+itions.
+ Ensuite pour chacun de ses états, on crée un ensemble pour chaque transition
+ (qui est l'ensemble de l'état résultant de cette transition et des états
+ qui possèdent un chemin composé d'epsilon-transition depuis cet état-là).
+ Si l'ensemble de ces états n'existe pas déjà, on en fait un nouvel état.
+ 
+\end_layout
+
 \begin_layout Section
 Algorithme de Knuth-Morris-Prat
 \end_layout
