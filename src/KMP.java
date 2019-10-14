@@ -48,9 +48,8 @@ public class KMP {
 
         int len = 0;
         int i = 1;
-        ret[0] = 0; // lps[0] is always 0
+        ret[0] = 0;
 
-        // the loop calculates lps[i] for i = 1 to M-1
         while (i < factor.length) {
             if (factor[i] == factor[len]) {
                 len++;

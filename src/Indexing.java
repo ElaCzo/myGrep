@@ -76,29 +76,6 @@ public class Indexing {
 
     }
 
-    public static ArrayList<IndexNode> loadIndexList(String indexPath) {
-        ArrayList<IndexNode> indexList = new ArrayList<>();
-        try {
-            ArrayList<String> txt = new ArrayList<>(Files.readAllLines(Paths.get(indexPath)));
-
-            for (String line : txt) {
-                String[] columns = line.split("\\s+");
-                IndexNode index = new IndexNode(columns[0]);
-
-                for (int i = 1; i < columns.length; i++) {
-                    String[] value = columns[i].split("[(,)]");
-                    index.addPos(new TextPosition(Integer.parseInt(value[1]), Integer.parseInt(value[2])));
-                }
-
-                indexList.add(index);
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return indexList;
-    }
-
     public static IndexTree loadIndexTree(String indexPath) {
         IndexTree indexTree = new IndexTree();
 

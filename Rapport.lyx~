@@ -671,13 +671,6 @@ lettre par lettre et a la dernière lettre renvoie la valeur dans le noeud
 \end_layout
 
 \begin_layout Standard
-\begin_inset space ~
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 L'indexation se fait dans 
 \emph on
 Indexing.java

@@ -29,11 +29,11 @@ public class myGrep {
 
         System.out.println("Chargement du texte");
         Instant now = Instant.now();
-    
+
         try {
             text = new ArrayList<>(Files.readAllLines(Paths.get(path)));
-            System.out.println(
-                    "Chargement du texte a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms");
+            System.out
+                    .println("Chargement du texte a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,7 +54,7 @@ public class myGrep {
             now = Instant.now();
 
             pos = itree.getPositions(regEx);
-            
+
             System.out.println(
                     "Recherche dans l'arbre a pris : " + Duration.between(now, Instant.now()).toNanos() + " µs\n");
 
@@ -70,16 +70,16 @@ public class myGrep {
 
         }
 
-        if (pos == null || pos.size() == 0) {
+        if ((pos == null || pos.size() == 0) && !kmpable(regEx)) {
             System.out.println("Methode Regex");
 
             try {
                 now = Instant.now();
-                pos = Automate.getOccurencesOnText(text,regEx);
-                System.out.println(
-                        "Recherche avec les automates a pris : " + Duration.between(now, Instant.now()).toMillis() + " ms\n");
+                pos = Automate.getOccurencesOnText(text, regEx);
+                System.out.println("Recherche avec les automates a pris : "
+                        + Duration.between(now, Instant.now()).toMillis() + " ms\n");
+            } catch (Exception e) {
             }
-            catch(Exception e){}
         }
 
         if (pos == null || pos.size() == 0) {

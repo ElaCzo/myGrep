@@ -1,10 +1,15 @@
-#LyX 2.3 created this file. For more info see http://www.lyx.org/
-\lyxformat 544
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
 \save_transient_properties true
 \origin unavailable
 \textclass article
+\begin_preamble
+% Added by lyx2lyx
+\renewcommand{\textendash}{--}
+\renewcommand{\textemdash}{---}
+\end_preamble
 \use_default_options true
 \maintain_unincluded_children false
 \language french
@@ -21,8 +26,6 @@
 \font_osf false
 \font_sf_scale 100 100
 \font_tt_scale 100 100
-\use_microtype false
-\use_dash_ligatures true
 \graphics default
 \default_output_format default
 \output_sync 0
@@ -52,21 +55,15 @@
 \suppress_date false
 \justification true
 \use_refstyle 1
-\use_minted 0
 \index Index
 \shortcut idx
 \color #008000
 \end_index
-\leftmargin 5cm
-\rightmargin 5cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
 \paragraph_indentation default
-\is_math_indent 0
-\math_numbering_side default
-\quotes_style swiss
-\dynamic_quotes 0
+\quotes_language french
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
@@ -530,7 +527,7 @@ Implémentation
 \end_layout
 
 \begin_layout Subsubsection*
-public static ArrayList<TextPosition> kmp (ArrayList<String> text, char[]
+public static ArrayList<TextPosition> kmp(ArrayList<String> text, char[]
  factor)
 \end_layout
 
@@ -560,7 +557,7 @@ On renvoie l'ensemble des positions trouvées.
 \end_layout
 
 \begin_layout Subsubsection*
-public static int[] retenue( char[] factor )
+public static int[] retenue(char[] factor)
 \end_layout
 
 \begin_layout Standard
@@ -626,57 +623,6 @@ L'arbre contient, pour chaque nœud, une liste de positions lorsque le nœud
  et de ses fils récursivement.
 \end_layout
 
-\begin_layout Subsection*
-Implémentation
-\end_layout
-
-\begin_layout Subsubsection*
-public static String createIndex(String path, ArrayList<String> text)
-\end_layout
-
-\begin_layout Standard
-Cette méthode fait appel au 
-\emph on
-script.bash
-\emph default
-, composé de awk qui va trouver les mots uniques, enlever les mots de 2
- caractères ou moins et les trier par nombre d’occurrences croissant et
- les écrire dans le fichier 
-\emph on
-.txt
-\emph default
-.
-\end_layout
-
-\begin_layout Standard
-Puis va lancer KMP sur chacun de ces mots afin de trouver les positions
- de ses occurrences, va les mettre dans un fichier 
-\emph on
-.index
-\emph default
- et retourne le path de ce fichier.
-\end_layout
-
-\begin_layout Subsection*
-public ArrayList<TextPosition> getPositions(String valeur)
-\end_layout
-
-\begin_layout Standard
-Parcours le 
-\emph on
-radix tree 
-\emph default
-lettre par lettre et a la dernière lettre renvoie la valeur dans le noeud
- courrant si il y en a, et celle contenues dans ses fils.
-\end_layout
-
-\begin_layout Standard
-\begin_inset space ~
-\end_inset
-
-
-\end_layout
-
 \begin_layout Standard
 L'indexation se fait dans 
 \emph on
@@ -724,11 +670,11 @@ A History of Babylon (124 304 mots):
 
 \begin_layout Itemize
 Recherche de 
-\begin_inset Quotes cld
+\begin_inset Quotes fld
 \end_inset
 
 Sargon
-\begin_inset Quotes crd
+\begin_inset Quotes frd
 \end_inset
 
  : 
@@ -758,11 +704,11 @@ recherche dans l'arbre : <1µs
 \end_deeper
 \begin_layout Itemize
 Recherche de 
-\begin_inset Quotes cld
+\begin_inset Quotes fld
 \end_inset
 
 S(a|g|r)*on
-\begin_inset Quotes crd
+\begin_inset Quotes frd
 \end_inset
 
 :
@@ -780,11 +726,11 @@ temps par l'automate : 161 ms
 \end_deeper
 \begin_layout Itemize
 Recherche de 
-\begin_inset Quotes cld
+\begin_inset Quotes fld
 \end_inset
 
 argon
-\begin_inset Quotes crd
+\begin_inset Quotes frd
 \end_inset
 
 
@@ -806,11 +752,11 @@ Dracula (164 424 mots):
 
 \begin_layout Itemize
 Recherche de 
-\begin_inset Quotes cld
+\begin_inset Quotes fld
 \end_inset
 
 Dracula
-\begin_inset Quotes crd
+\begin_inset Quotes frd
 \end_inset
 
  : 
@@ -840,11 +786,11 @@ recherche dans l'arbre : <1µs
 \end_deeper
 \begin_layout Itemize
 Recherche de 
-\begin_inset Quotes cld
+\begin_inset Quotes fld
 \end_inset
 
 D(r|a|c)*ula
-\begin_inset Quotes crd
+\begin_inset Quotes frd
 \end_inset
 
 :
@@ -862,11 +808,11 @@ temps par l'automate : 125 ms
 \end_deeper
 \begin_layout Itemize
 Recherche de 
-\begin_inset Quotes cld
+\begin_inset Quotes fld
 \end_inset
 
 racula
-\begin_inset Quotes crd
+\begin_inset Quotes frd
 \end_inset
 
 
@@ -888,11 +834,11 @@ Don Quixote (430 267 mots):
 
 \begin_layout Itemize
 Recherche de 
-\begin_inset Quotes cld
+\begin_inset Quotes fld
 \end_inset
 
 Quixote
-\begin_inset Quotes crd
+\begin_inset Quotes frd
 \end_inset
 
  : 
@@ -922,11 +868,11 @@ recherche dans l'arbre : <1µs
 \end_deeper
 \begin_layout Itemize
 Recherche de 
-\begin_inset Quotes cld
+\begin_inset Quotes fld
 \end_inset
 
 Q(u|i|x)*ote
-\begin_inset Quotes crd
+\begin_inset Quotes frd
 \end_inset
 
 :
@@ -944,11 +890,11 @@ temps par l'automate : 600 ms
 \end_deeper
 \begin_layout Itemize
 Recherche de 
-\begin_inset Quotes cld
+\begin_inset Quotes fld
 \end_inset
 
 uixote
-\begin_inset Quotes crd
+\begin_inset Quotes frd
 \end_inset
 
 
