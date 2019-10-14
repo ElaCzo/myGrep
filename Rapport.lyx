@@ -519,7 +519,64 @@ KMP est un algorithme simple ne nécessitant pas de structure de données
 \emph on
 KMP.java
 \emph default
- .
+.
+\end_layout
+
+\begin_layout Subsection*
+Implémentation
+\end_layout
+
+\begin_layout Subsubsection*
+public static ArrayList<TextPosition> kmp(ArrayList<String> text, char[]
+ factor)
+\end_layout
+
+\begin_layout Standard
+On souhaite avoir toutes les positions dans le texte des début du mot à
+ chercher.
+ Pour cela, on parcourt le texte.
+ 
+\end_layout
+
+\begin_layout Standard
+Si une lettre correspond à la lettre courante du mot, on vérifie si le mot
+ n'est pas terminé.
+ Si c'est le cas, on ajoute à l'ensemble des solutions la position de départ
+ du mot dans le texte, puis on récupère la retenue à cet indice et on met
+ à jour l'indice.
+ 
+\end_layout
+
+\begin_layout Standard
+Si la lettre ne correspond pas à la lettre courante du mot, on récupère
+ la retenue et on met à jour l'indice.
+\end_layout
+
+\begin_layout Standard
+On renvoie l'ensemble des positions trouvées.
+\end_layout
+
+\begin_layout Subsubsection*
+public static int[] retenue(char[] factor)
+\end_layout
+
+\begin_layout Standard
+Cette fonction crée un tableau de retenues pour un facteur.
+ 
+\end_layout
+
+\begin_layout Standard
+Pour chaque lettre du facteur, si la lettre correspond à la première lettre
+ du facteur, on met à jour le retenue et on comparera par la suite la deuxième
+ lettre des facteurs.
+ 
+\end_layout
+
+\begin_layout Standard
+Sinon, si on ne comparait pas la première lettre du facteur, on reprend
+ à la retenue, alors que si c'était la première lettre, on met à jour la
+ retenue courante.
+ 
 \end_layout
 
 \begin_layout Section
